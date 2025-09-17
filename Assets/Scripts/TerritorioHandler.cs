@@ -75,38 +75,13 @@ public class TerritorioHandler : MonoBehaviour
 
         if (collidingColliders.Count > 0)
         {
-            Debug.Log($"Objects colliding with {gameObject.name}:");
-            foreach (Collider2D collider in collidingColliders)
-            {
-                Debug.Log($"- {collider.gameObject.name}");
-            }
+            string names = string.Join(", ", collidingColliders.ConvertAll(c => c.gameObject.name));
+            Debug.Log($"Objetos colidindo com {gameObject.name}:          {names}");
         }
         else
         {
-            Debug.Log($"{gameObject.name} is not colliding with any other objects.");
+            Debug.Log($"{gameObject.name} não está colidindo com ninguém!");
         }
     }
 
-    // Alternative method using OnCollision/OnTrigger events (commented out)
-    /*
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        Debug.Log($"{gameObject.name} started colliding with: {other.gameObject.name}");
-    }
-
-    void OnTriggerExit2D(Collider2D other)
-    {
-        Debug.Log($"{gameObject.name} stopped colliding with: {other.gameObject.name}");
-    }
-
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-        Debug.Log($"{gameObject.name} started colliding with: {collision.gameObject.name}");
-    }
-
-    void OnCollisionExit2D(Collision2D collision)
-    {
-        Debug.Log($"{gameObject.name} stopped colliding with: {collision.gameObject.name}");
-    }
-    */
 }
