@@ -38,12 +38,12 @@ public class EventSystemDebugger : MonoBehaviour
         if (results.Count > 0)
         {
             // O raio atingiu pelo menos um objeto.
-            Debug.Log($"<color=green>EventSystem detectou o mouse sobre:</color> {results[0].gameObject.name}");
+            //Debug.Log($"<color=green>EventSystem detectou o mouse sobre:</color> {results[0].gameObject.name}");
         }
         else
         {
             // O raio não atingiu nenhum objeto que o EventSystem consiga detectar.
-            Debug.Log("<color=red>EventSystem não detectou nenhum objeto sob o mouse.</color>");
+            //Debug.Log("<color=red>EventSystem não detectou nenhum objeto sob o mouse.</color>");
         }
     }
 }
