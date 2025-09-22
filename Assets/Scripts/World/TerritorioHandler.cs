@@ -1,9 +1,8 @@
-using UnityEngine; // Biblioteca principal da Unity, essencial para qualquer script.
+using UnityEngine; 
 using UnityEngine.EventSystems; // Importa o sistema de eventos, necessário para usar as interfaces IPointerEnterHandler e IPointerExitHandler.
-using System.Collections.Generic; // Permite o uso de listas genéricas, como a List<TerritorioHandler>.
+using System.Collections.Generic; 
 using System.Linq; // Oferece métodos adicionais para trabalhar com coleções
 
-// MonoBehaviour: Classe base da Unity que permite que este script seja anexado a um GameObject.
 // IPointerEnterHandler, IPointerExitHandler: Interfaces que "contratam" o script com o EventSystem.
 // Elas garantem que os métodos OnPointerEnter e OnPointerExit serão chamados quando o mouse entrar ou sair do objeto.
 public class TerritorioHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
@@ -15,7 +14,11 @@ public class TerritorioHandler : MonoBehaviour, IPointerEnterHandler, IPointerEx
 
     private SpriteRenderer spriteRenderer; // Armazena a referência ao componente visual do território.
     private Color originalColor; 
-    public List<TerritorioHandler> vizinhos; 
+    public List<TerritorioHandler> vizinhos;
+
+    [Header("Dados do Jogo")]
+    public Player donoDoTerritorio; 
+    public int numeroDeTropas;
 
     // O método Start() é chamado pela Unity apenas uma vez, no primeiro frame em que o script está ativo. É usado para configurar o estado inicial do objeto.
     void Start()
@@ -70,5 +73,26 @@ public class TerritorioHandler : MonoBehaviour, IPointerEnterHandler, IPointerEx
                 vizinhos.Add(neighbor);
             }
         }
+    }
+    /// <summary>
+    /// Atualiza a aparência do território (cor) com base nos seus dados atuais.
+    /// </summary>
+    public void AtualizarVisual()
+    {
+        // Verifica se há um dono atribuído
+        if (donoDoTerritorio != null)
+        {
+            // Muda a cor do sprite para a cor do jogador dono.
+            spriteRenderer.color = donoDoTerritorio.cor;
+        }
+        else
+        {
+            // Se não houver dono (neutro), define uma cor padrão (ex: cinza).
+            spriteRenderer.color = Color.gray;
+        }
+
+        // MUITO IMPORTANTE: Atualiza a "cor original" para a nova cor do dono.
+        // Isso garante que o efeito de hover funcione corretamente depois que o dono for definido.
+        originalColor = spriteRenderer.color;
     }
 }
