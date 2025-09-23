@@ -13,6 +13,8 @@ public class GameManager : MonoBehaviour
 
     public List<TerritorioHandler> todosOsTerritorios;
 
+    public TerritorioHandler territorio;
+
     void Awake()
     {
         if (instance == null) instance = this;
@@ -24,14 +26,15 @@ public class GameManager : MonoBehaviour
         jogador1 = new Player("Jogador 1", Color.blue);
         jogador2 = new Player("Jogador 2", Color.red);
 
-        jogadorAtual = jogador1;
+        jogadorAtual = jogador1; // começa sempre pelo jogador 1
 
         todosOsTerritorios = FindObjectsByType<TerritorioHandler>(FindObjectsSortMode.None).ToList();
         DistribuirTerritoriosIniciais();
 
-        Debug.Log("GameManager iniciado. Turno de: " + jogadorAtual.nome);
+        // Atualiza os territórios com o jogador do turno atual
+        AtualizarPlayerDoTurnoNosTerritorios();
 
-        // Print final de territórios por jogador
+        Debug.Log("GameManager iniciado. Turno de: " + jogadorAtual.nome);
         PrintTerritoriosPorJogador();
     }
 
@@ -75,5 +78,17 @@ public class GameManager : MonoBehaviour
     {
         jogadorAtual = (jogadorAtual == jogador1) ? jogador2 : jogador1;
         Debug.Log("Agora é o turno de: " + jogadorAtual.nome);
+
+        // Atualiza todos os territórios com o novo jogador do turno
+        AtualizarPlayerDoTurnoNosTerritorios();
     }
+
+    void AtualizarPlayerDoTurnoNosTerritorios()
+    {
+        foreach (var territorio in todosOsTerritorios)
+        {
+            territorio.playerDoTurno = jogadorAtual;
+        }
+    }
+
 }

@@ -12,6 +12,8 @@ public class TerritorioHandler : MonoBehaviour
     public Player donoDoTerritorio;
     public int numeroDeTropas;
 
+    public Player playerDoTurno;
+
     public BorderScript borderScript;
 
     void Start()
@@ -60,19 +62,36 @@ public class TerritorioHandler : MonoBehaviour
     {
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
-            // Pega a posição do mouse em mundo
             Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
             Vector2 mousePos2D = new Vector2(mouseWorldPos.x, mouseWorldPos.y);
 
-            // Checa se o mouse está colidindo com o collider deste território
             Collider2D col = GetComponent<Collider2D>();
-            if (col == Physics2D.OverlapPoint(mousePos2D))
+
+            if (col == Physics2D.OverlapPoint(mousePos2D) && donoDoTerritorio == playerDoTurno)
             {
+                // Mostra a borda do território clicado
                 borderScript.AlternaVisibilidade();
-                Debug.Log($"Sprite {gameObject.name} clicado!");
+                borderScript.MudarCor(Color.green);
+
+                // Mostra borda apenas dos vizinhos inimigos
+                foreach (var vizinho in vizinhos)
+                {
+                    if (vizinho != null && vizinho.borderScript != null)
+                    {
+                        // só mostra se o vizinho não for do mesmo dono
+                        if (vizinho.donoDoTerritorio != donoDoTerritorio)
+                        {
+                            vizinho.borderScript.AlternaVisibilidade();
+                            vizinho.borderScript.MudarCor(Color.red);
+                        }
+                    }
+                }
+
+                Debug.Log($"Sprite {gameObject.name} clicado pelo {playerDoTurno.nome}!");
             }
         }
     }
+
 
 }
 
