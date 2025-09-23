@@ -102,19 +102,32 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: MapaAlphaPNG_0
+      name: T0
       rect:
         serializedVersion: 2
-        x: 306
+        x: 307
         y: 671
         width: 256
         height: 275
-      alignment: 0
-      pivot: {x: 0, y: 0}
+      alignment: 9
+      pivot: {x: 0.6726639, y: 0.53571886}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -128,15 +141,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: MapaAlphaPNG_1
+      name: T8
       rect:
         serializedVersion: 2
-        x: 314
-        y: 71
-        width: 1321
-        height: 956
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 284
+        y: 221
+        width: 382
+        height: 408
+      alignment: 9
+      pivot: {x: 0.5128569, y: 0.49598762}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -150,15 +163,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: MapaAlphaPNG_2
+      name: T5
       rect:
         serializedVersion: 2
-        x: 1201
-        y: 135
-        width: 445
-        height: 365
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 1234
+        y: 127
+        width: 321
+        height: 231
+      alignment: 9
+      pivot: {x: 0.61220086, y: 0.44330382}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -171,11 +184,165 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: T2
+      rect:
+        serializedVersion: 2
+        x: 711
+        y: 628
+        width: 879
+        height: 399
+      alignment: 9
+      pivot: {x: 0.46647567, y: 0.53692734}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9b8e2ecbaa562064ab289a7cc5b68932
+      internalID: -532089799
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: T3
+      rect:
+        serializedVersion: 2
+        x: 825
+        y: 512
+        width: 839
+        height: 311
+      alignment: 9
+      pivot: {x: 0.5, y: 0.35260776}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 83807ce55f9fca84893727d96196872d
+      internalID: 924360075
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: T7
+      rect:
+        serializedVersion: 2
+        x: 519
+        y: 66
+        width: 461
+        height: 445
+      alignment: 9
+      pivot: {x: 0.53551215, y: 0.49632123}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ebf9a942a7c45664c81974ab52729565
+      internalID: -1712503803
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: T6
+      rect:
+        serializedVersion: 2
+        x: 943
+        y: 122
+        width: 238
+        height: 213
+      alignment: 9
+      pivot: {x: 0.5619071, y: 0.5614876}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 79af0f720bea9b8469edf246249a035e
+      internalID: 340206327
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: T4
+      rect:
+        serializedVersion: 2
+        x: 1200
+        y: 197
+        width: 469
+        height: 314
+      alignment: 9
+      pivot: {x: 0.6640602, y: 0.6199156}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 29e211412f72ce341a22594017fcd063
+      internalID: 2106105268
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: T1
+      rect:
+        serializedVersion: 2
+        x: 517
+        y: 356
+        width: 434
+        height: 650
+      alignment: 9
+      pivot: {x: 0.48868388, y: 0.48992544}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e91d9fe6e719a3045bd9a0e0da36f9da
+      internalID: -1438565404
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MapaAlphaPNG_0
+      rect:
+        serializedVersion: 2
+        x: 220
+        y: 42
+        width: 1519
+        height: 1033
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fcfa458287ffe3440b670335c5709134
+      internalID: -37404385
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: ecdf7a7a4daf71e4aa4f25c64c04f731
     internalID: 0
     vertices: []
     indices: 
@@ -185,9 +352,16 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      MapaAlphaPNG_0: -7652318850008402103
-      MapaAlphaPNG_1: 6497748474359529196
-      MapaAlphaPNG_2: 4668801008147203787
+      MapaAlphaPNG_0: -37404385
+      T0: -7652318850008402103
+      T1: -1438565404
+      T2: -532089799
+      T3: 924360075
+      T4: 2106105268
+      T5: 4668801008147203787
+      T6: 340206327
+      T7: -1712503803
+      T8: 6497748474359529196
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

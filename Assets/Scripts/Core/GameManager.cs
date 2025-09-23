@@ -21,8 +21,8 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        jogador1 = new Player("Jogador 1", Color.blue);
-        jogador2 = new Player("Jogador 2", Color.red);
+        jogador1 = new Player("Jogador 1", Color.rebeccaPurple);
+        jogador2 = new Player("Jogador 2", Color.deepPink);
 
         jogadorAtual = jogador1;
 

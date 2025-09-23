@@ -1,7 +1,10 @@
 // TerritorioHandler.cs
 using System.Collections.Generic;
+using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro;
 
 public class TerritorioHandler : MonoBehaviour
 {
@@ -14,10 +17,17 @@ public class TerritorioHandler : MonoBehaviour
 
     public BorderScript borderScript;
 
+    [Header("Componentes Visuais do Exército")]
+    public GameObject exercitoPrefab;
+    public Transform pontoDeAncoragem;
+
+    private GameObject exercitoInstanciado;
+    private TextMeshProUGUI textoDoContador;
+
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        FindAndStoreNeighbors();
+        //FindAndStoreNeighbors();
     }
 
     void FindAndStoreNeighbors()
@@ -49,31 +59,57 @@ public class TerritorioHandler : MonoBehaviour
         {
             spriteRenderer.color = Color.gray;
         }
-    }
 
-    void Update()
-    {
-        CliqueEsquerdo();
-    }
-
-    void CliqueEsquerdo()
-    {
-        if (Mouse.current.leftButton.wasPressedThisFrame)
+        if (exercitoPrefab != null && donoDoTerritorio != null)
         {
-            // Pega a posição do mouse em mundo
-            Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-            Vector2 mousePos2D = new Vector2(mouseWorldPos.x, mouseWorldPos.y);
-
-            // Checa se o mouse está colidindo com o collider deste território
-            Collider2D col = GetComponent<Collider2D>();
-            if (col == Physics2D.OverlapPoint(mousePos2D))
+            if (exercitoInstanciado == null)
             {
-                borderScript.AlternaVisibilidade();
-                Debug.Log($"Sprite {gameObject.name} clicado!");
+                exercitoInstanciado = Instantiate(exercitoPrefab, pontoDeAncoragem.position, Quaternion.identity);
+                exercitoInstanciado.transform.SetParent(this.transform); //Organiza na hierarquia
+                textoDoContador = exercitoInstanciado.GetComponentInChildren<TextMeshProUGUI>();
+            }
+
+            if (textoDoContador != null)
+            {
+                textoDoContador.text = numeroDeTropas.ToString();
+            }
+
+            SpriteRenderer spriteDoExercito = exercitoInstanciado.transform.Find("Visual_Peca").GetComponent<SpriteRenderer>();
+            if (spriteDoExercito != null)
+            {
+                spriteDoExercito.color = donoDoTerritorio.cor;
             }
         }
-    }
+        else if (exercitoInstanciado != null)
+        {
+            Destroy(exercitoInstanciado);
+        }
 
+
+        void Update()
+        {
+            CliqueEsquerdo();
+        }
+
+        void CliqueEsquerdo()
+        {
+            if (Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                // Pega a posição do mouse em mundo
+                Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+                Vector2 mousePos2D = new Vector2(mouseWorldPos.x, mouseWorldPos.y);
+
+                // Checa se o mouse está colidindo com o collider deste território
+                Collider2D col = GetComponent<Collider2D>();
+                if (col == Physics2D.OverlapPoint(mousePos2D))
+                {
+                    borderScript.AlternaVisibilidade();
+                    Debug.Log($"Sprite {gameObject.name} clicado!");
+                }
+            }
+        }
+
+    }
 }
 
 
