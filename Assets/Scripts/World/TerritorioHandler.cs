@@ -1,74 +1,175 @@
-using UnityEngine; // Biblioteca principal da Unity, essencial para qualquer script.
-using UnityEngine.EventSystems; // Importa o sistema de eventos, necessário para usar as interfaces IPointerEnterHandler e IPointerExitHandler.
-using System.Collections.Generic; // Permite o uso de listas genéricas, como a List<TerritorioHandler>.
-using System.Linq; // Oferece métodos adicionais para trabalhar com coleções
+// TerritorioHandler.cs
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
-// MonoBehaviour: Classe base da Unity que permite que este script seja anexado a um GameObject.
-// IPointerEnterHandler, IPointerExitHandler: Interfaces que "contratam" o script com o EventSystem.
-// Elas garantem que os métodos OnPointerEnter e OnPointerExit serão chamados quando o mouse entrar ou sair do objeto.
-public class TerritorioHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class TerritorioHandler : MonoBehaviour
 {
+    private SpriteRenderer spriteRenderer;
+    public List<TerritorioHandler> vizinhos;
 
-    [Header("Hover Settings")]
-    [Tooltip("A cor que o território terá quando o mouse estiver sobre ele")] 
-    public Color hoverColor = new Color(1f, 0.5f, 0.5f, 1f); // Define a cor do hover, com um valor padrão vermelho claro.
+    [Header("Dados do Jogo")]
+    public Player donoDoTerritorio;
+    public int numeroDeTropas;
 
-    private SpriteRenderer spriteRenderer; // Armazena a referência ao componente visual do território.
-    private Color originalColor; 
-    public List<TerritorioHandler> vizinhos; 
+    public Player playerDoTurno;
 
-    // O método Start() é chamado pela Unity apenas uma vez, no primeiro frame em que o script está ativo. É usado para configurar o estado inicial do objeto.
+    public BorderScript borderScript;
+
+    private static TerritorioHandler territorioSelecionado = null;
+
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        originalColor = spriteRenderer.color;
         FindAndStoreNeighbors();
     }
-    // Este método é chamado pelo EventSystem quando o ponteiro do mouse ENTRA na área do collider deste objeto.
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        spriteRenderer.color = hoverColor;
-    }
 
-    // Este método é chamado pelo EventSystem quando o ponteiro do mouse SAI da área do collider deste objeto
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        spriteRenderer.color = originalColor;
-    }
-    // Método responsável por usar o sistema de física 2D para detectar e armazenar todos os territórios adjacentes
     void FindAndStoreNeighbors()
     {
         vizinhos = new List<TerritorioHandler>();
-        // Cria uma lista temporária que será preenchida pelo método de física
         List<Collider2D> collidingColliders = new List<Collider2D>();
-
-        // Cria um filtro de contato. `noFilter` é uma propriedade estática que retorna um filtro que não filtra nada,
-        // ou seja, ele considerará todos os resultados. Esta é a forma moderna e correta de fazer isso
         ContactFilter2D filter = ContactFilter2D.noFilter;
-
-        // Pede ao componente Collider2D deste objeto para verificar todos os outros colliders que o estão tocando
-        // e preencher a lista `collidingColliders` com os resultados
         GetComponent<Collider2D>().Overlap(filter, collidingColliders);
 
-        // Percorre cada um dos colliders que foram encontrados
         foreach (var collider in collidingColliders)
         {
-            // Se o collider for do mesmo game object que este script, ignora
-            if (collider.gameObject == gameObject)
-            {
-                continue;
-            }
-
-            // Tenta obter o script "TerritorioHandler" do GameObject vizinho.
+            if (collider.gameObject == gameObject) continue;
             TerritorioHandler neighbor = collider.GetComponent<TerritorioHandler>();
+            if (neighbor != null) vizinhos.Add(neighbor);
+        }
+    }
 
-            // Se o objeto vizinho de fato tem o script (ou seja, `neighbor` não é nulo),
-            // significa que ele é um território.
-            if (neighbor != null)
+    public void AtualizarVisual()
+    {
+        if (spriteRenderer == null)
+            spriteRenderer = GetComponent<SpriteRenderer>();
+
+        if (donoDoTerritorio != null)
+        {
+            spriteRenderer.color = donoDoTerritorio.cor;
+            Debug.Log($"[Visual] Território '{name}' agora é do {donoDoTerritorio.nome} e pintado de {donoDoTerritorio.cor}");
+        }
+        else
+        {
+            spriteRenderer.color = Color.gray;
+        }
+    }
+
+    void Update()
+    {
+        CliqueEsquerdo();
+    }
+
+    void CliqueEsquerdo()
+    {
+        if (Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+            Vector2 mousePos2D = new Vector2(mouseWorldPos.x, mouseWorldPos.y);
+
+            Collider2D col = GetComponent<Collider2D>();
+
+            if (col == Physics2D.OverlapPoint(mousePos2D))
             {
-                // Adiciona o território vizinho encontrado à nossa lista de vizinhos.
-                vizinhos.Add(neighbor);
+                // Clique em território do jogador atual
+                if (donoDoTerritorio == playerDoTurno)
+                {
+                    if (territorioSelecionado != null && territorioSelecionado != this)
+                    {
+                        territorioSelecionado.Desselecionar();
+                    }
+
+                    if (territorioSelecionado == this)
+                    {
+                        Desselecionar();
+                        territorioSelecionado = null;
+                    }
+                    else
+                    {
+                        Selecionar();
+                        territorioSelecionado = this;
+                    }
+                }
+                // Clique em território inimigo
+                else
+                {
+                    // Só ataca se houver um território selecionado do jogador atual e for vizinho
+                    if (territorioSelecionado != null && territorioSelecionado.vizinhos.Contains(this))
+                    {
+                        Atacar(territorioSelecionado, this);
+                    }
+                }
             }
         }
     }
+    void Atacar(TerritorioHandler atacante, TerritorioHandler defensor)
+    {
+        Debug.Log($"{atacante.name} ataca {defensor.name}!");
+
+        // Logica do ataque (atacante sempre vence para simplificar)
+        defensor.donoDoTerritorio = atacante.donoDoTerritorio;
+
+        defensor.AtualizarVisual();
+        defensor.borderScript.MudarCor(Color.white);
+        defensor.borderScript.AlternaVisibilidade();
+
+        // Dessseleciona todos
+        DesselecionarTodos();
+
+        // Troca de turno
+        GameManager.instance.TrocarTurno();
+    }
+
+    // Métodos auxiliares
+    void Selecionar()
+    {
+        borderScript.AlternaVisibilidade();
+        borderScript.MudarCor(Color.green);
+
+        foreach (var vizinho in vizinhos)
+        {
+            if (vizinho != null && vizinho.borderScript != null && vizinho.donoDoTerritorio != donoDoTerritorio)
+            {
+                vizinho.borderScript.AlternaVisibilidade();
+                vizinho.borderScript.MudarCor(Color.red);
+            }
+        }
+    }
+
+    void Desselecionar()
+    {
+        borderScript.AlternaVisibilidade();
+        borderScript.MudarCor(Color.white);
+
+        foreach (var vizinho in vizinhos)
+        {
+            if (vizinho != null && vizinho.borderScript != null && vizinho.donoDoTerritorio != donoDoTerritorio)
+            {
+                vizinho.borderScript.AlternaVisibilidade();
+                vizinho.borderScript.MudarCor(Color.white);
+            }
+        }
+    }
+
+    public static void DesselecionarTodos()
+    {
+        if (territorioSelecionado != null)
+        {
+            territorioSelecionado.Desselecionar();
+            territorioSelecionado = null;
+        }
+    }
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
