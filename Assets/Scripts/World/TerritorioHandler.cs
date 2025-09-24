@@ -106,8 +106,9 @@ public class TerritorioHandler : MonoBehaviour
     {
         Debug.Log($"{atacante.name} ataca {defensor.name}!");
 
-        // Transferir o território para o atacante
+        // Logica do ataque (atacante sempre vence para simplificar)
         defensor.donoDoTerritorio = atacante.donoDoTerritorio;
+
         defensor.AtualizarVisual();
         defensor.borderScript.MudarCor(Color.white);
         defensor.borderScript.AlternaVisibilidade();

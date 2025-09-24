@@ -1,7 +1,10 @@
 // GameManager.cs
-using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -14,6 +17,8 @@ public class GameManager : MonoBehaviour
     public List<TerritorioHandler> todosOsTerritorios;
 
     public TerritorioHandler territorio;
+
+    public TextMeshProUGUI turnoText; // arraste o Text do Canvas aqui pelo Inspector
 
     void Awake()
     {
@@ -28,6 +33,8 @@ public class GameManager : MonoBehaviour
 
         jogadorAtual = jogador1; // começa sempre pelo jogador 1
 
+        AtualizarTextoDoTurno();
+
         todosOsTerritorios = FindObjectsByType<TerritorioHandler>(FindObjectsSortMode.None).ToList();
         DistribuirTerritoriosIniciais();
 
@@ -37,7 +44,13 @@ public class GameManager : MonoBehaviour
         Debug.Log("GameManager iniciado. Turno de: " + jogadorAtual.nome);
         PrintTerritoriosPorJogador();
     }
-
+    public void AtualizarTextoDoTurno()
+    {
+        if (turnoText != null)
+        {
+            turnoText.text = "Turno do: " + jogadorAtual.nomeColorido;
+        }
+    }
     void DistribuirTerritoriosIniciais()
     {
         List<TerritorioHandler> territoriosEmbaralhados = todosOsTerritorios.OrderBy(a => Random.value).ToList();
@@ -85,6 +98,9 @@ public class GameManager : MonoBehaviour
 
         // Atualiza todos os territórios com o novo jogador do turno
         AtualizarPlayerDoTurnoNosTerritorios();
+
+        AtualizarTextoDoTurno();
+        ChecarVitoria();
     }
 
     void AtualizarPlayerDoTurnoNosTerritorios()
@@ -93,6 +109,29 @@ public class GameManager : MonoBehaviour
         {
             territorio.playerDoTurno = jogadorAtual;
         }
+    }
+
+    public void ChecarVitoria()
+    {
+        if (todosOsTerritorios.Count == 0) return;
+
+        Player donoReferencia = todosOsTerritorios[0].donoDoTerritorio;
+
+        foreach (var territorio in todosOsTerritorios)
+        {
+            if (territorio.donoDoTerritorio != donoReferencia)
+                return; // ainda há territórios de outros jogadores
+        }
+
+        // Todos os territórios são do mesmo jogador
+        Debug.Log("Jogo acabou! Vencedor: " + donoReferencia.nome);
+
+        // Salva o vencedor
+        VencedorInfo.nomeVencedor = donoReferencia.nome;
+        VencedorInfo.corVencedor = donoReferencia.cor;
+
+        // Carrega a cena de fim
+        SceneManager.LoadScene(2); // substitua pelo nome da sua cena de fim
     }
 
 }
