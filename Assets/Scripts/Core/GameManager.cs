@@ -76,8 +76,12 @@ public class GameManager : MonoBehaviour
 
     public void TrocarTurno()
     {
+        // Troca o jogador atual
         jogadorAtual = (jogadorAtual == jogador1) ? jogador2 : jogador1;
         Debug.Log("Agora é o turno de: " + jogadorAtual.nome);
+
+        // Deseleciona todos os territórios selecionados (se houver)
+        TerritorioHandler.DesselecionarTodos();
 
         // Atualiza todos os territórios com o novo jogador do turno
         AtualizarPlayerDoTurnoNosTerritorios();

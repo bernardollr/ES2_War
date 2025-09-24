@@ -8,6 +8,7 @@ public class BorderScript : MonoBehaviour
     {
         if (spriteRend == null)
             spriteRend = GetComponent<SpriteRenderer>();
+        spriteRend.color = Color.white; // Cor padrão branca
 
         spriteRend.enabled = false;
     }

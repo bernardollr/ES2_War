@@ -16,6 +16,8 @@ public class TerritorioHandler : MonoBehaviour
 
     public BorderScript borderScript;
 
+    private static TerritorioHandler territorioSelecionado = null;
+
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -67,28 +69,93 @@ public class TerritorioHandler : MonoBehaviour
 
             Collider2D col = GetComponent<Collider2D>();
 
-            if (col == Physics2D.OverlapPoint(mousePos2D) && donoDoTerritorio == playerDoTurno)
+            if (col == Physics2D.OverlapPoint(mousePos2D))
             {
-                // Mostra a borda do território clicado
-                borderScript.AlternaVisibilidade();
-                borderScript.MudarCor(Color.green);
-
-                // Mostra borda apenas dos vizinhos inimigos
-                foreach (var vizinho in vizinhos)
+                // Clique em território do jogador atual
+                if (donoDoTerritorio == playerDoTurno)
                 {
-                    if (vizinho != null && vizinho.borderScript != null)
+                    if (territorioSelecionado != null && territorioSelecionado != this)
                     {
-                        // só mostra se o vizinho não for do mesmo dono
-                        if (vizinho.donoDoTerritorio != donoDoTerritorio)
-                        {
-                            vizinho.borderScript.AlternaVisibilidade();
-                            vizinho.borderScript.MudarCor(Color.red);
-                        }
+                        territorioSelecionado.Desselecionar();
+                    }
+
+                    if (territorioSelecionado == this)
+                    {
+                        Desselecionar();
+                        territorioSelecionado = null;
+                    }
+                    else
+                    {
+                        Selecionar();
+                        territorioSelecionado = this;
                     }
                 }
-
-                Debug.Log($"Sprite {gameObject.name} clicado pelo {playerDoTurno.nome}!");
+                // Clique em território inimigo
+                else
+                {
+                    // Só ataca se houver um território selecionado do jogador atual e for vizinho
+                    if (territorioSelecionado != null && territorioSelecionado.vizinhos.Contains(this))
+                    {
+                        Atacar(territorioSelecionado, this);
+                    }
+                }
             }
+        }
+    }
+    void Atacar(TerritorioHandler atacante, TerritorioHandler defensor)
+    {
+        Debug.Log($"{atacante.name} ataca {defensor.name}!");
+
+        // Transferir o território para o atacante
+        defensor.donoDoTerritorio = atacante.donoDoTerritorio;
+        defensor.AtualizarVisual();
+        defensor.borderScript.MudarCor(Color.white);
+        defensor.borderScript.AlternaVisibilidade();
+
+        // Dessseleciona todos
+        DesselecionarTodos();
+
+        // Troca de turno
+        GameManager.instance.TrocarTurno();
+    }
+
+    // Métodos auxiliares
+    void Selecionar()
+    {
+        borderScript.AlternaVisibilidade();
+        borderScript.MudarCor(Color.green);
+
+        foreach (var vizinho in vizinhos)
+        {
+            if (vizinho != null && vizinho.borderScript != null && vizinho.donoDoTerritorio != donoDoTerritorio)
+            {
+                vizinho.borderScript.AlternaVisibilidade();
+                vizinho.borderScript.MudarCor(Color.red);
+            }
+        }
+    }
+
+    void Desselecionar()
+    {
+        borderScript.AlternaVisibilidade();
+        borderScript.MudarCor(Color.white);
+
+        foreach (var vizinho in vizinhos)
+        {
+            if (vizinho != null && vizinho.borderScript != null && vizinho.donoDoTerritorio != donoDoTerritorio)
+            {
+                vizinho.borderScript.AlternaVisibilidade();
+                vizinho.borderScript.MudarCor(Color.white);
+            }
+        }
+    }
+
+    public static void DesselecionarTodos()
+    {
+        if (territorioSelecionado != null)
+        {
+            territorioSelecionado.Desselecionar();
+            territorioSelecionado = null;
         }
     }
 
