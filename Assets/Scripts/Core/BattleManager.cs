@@ -32,9 +32,6 @@ public class BattleManager : MonoBehaviour {
         if (estaRolando) return;
 
         StartCoroutine(ProcessarBatalha());
-        
-
-        
     }
 
     private IEnumerator ProcessarBatalha() {
