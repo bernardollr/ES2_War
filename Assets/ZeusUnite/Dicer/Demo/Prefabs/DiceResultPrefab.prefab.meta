@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 0f4031e71a264ef4a83ffca823f9da89
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 228938
+  packageName: Dice Generator
+  packageVersion: 1.0.0
+  assetPath: Assets/ZeusUnite/Dicer/Demo/Prefabs/DiceResultPrefab.prefab
+  uploadId: 518195

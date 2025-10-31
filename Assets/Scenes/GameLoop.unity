@@ -3003,6 +3003,38 @@ PolygonCollider2D:
       - {x: 1.06, y: -0.555}
       - {x: 1.05, y: -0.42499998}
   m_UseDelaunayMesh: 0
+--- !u!1 &1299149150
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1299149151}
+  m_Layer: 0
+  m_Name: BattleManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1299149151
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1299149150}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.36305, y: -0.00494, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1993202060}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1329038364
 GameObject:
   m_ObjectHideFlags: 0
@@ -4247,6 +4279,62 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4313732225818560748, guid: 284b87d9b6816274e8c50f1d76dfce48, type: 3}
   m_PrefabInstance: {fileID: 1968778117}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1993202059
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1993202060}
+  - component: {fileID: 1993202061}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1993202060
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1993202059}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1299149151}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1993202061
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1993202059}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47381d4593d345440aa507d20fa9ab78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DiceDemo
+  diceEndResult: {fileID: 0}
+  diceRolledResults: {fileID: 0}
+  amountDicePlusButton: {fileID: 0}
+  amountDiceMinusButton: {fileID: 0}
+  rangeDicePlusButton: {fileID: 0}
+  rangeDiceMinusButton: {fileID: 0}
+  amountDiceField: {fileID: 0}
+  rangeDiceField: {fileID: 0}
+  percentageResult: {fileID: 0}
+  characterResult: {fileID: 0}
+  lastDiceContent: {fileID: 0}
+  resultPrefab: {fileID: 0}
 --- !u!1 &2033264021
 GameObject:
   m_ObjectHideFlags: 0
@@ -4356,6 +4444,7 @@ SceneRoots:
   - {fileID: 1066749103}
   - {fileID: 787887220}
   - {fileID: 577911516}
+  - {fileID: 1299149151}
   - {fileID: 826313467}
   - {fileID: 690492673}
   - {fileID: 1123586323}

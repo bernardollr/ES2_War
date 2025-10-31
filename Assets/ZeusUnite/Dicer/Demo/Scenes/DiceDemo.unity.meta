@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: dbe66846f0513bb4480b3329b409be4c
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 228938
+  packageName: Dice Generator
+  packageVersion: 1.0.0
+  assetPath: Assets/ZeusUnite/Dicer/Demo/Scenes/DiceDemo.unity
+  uploadId: 518195
