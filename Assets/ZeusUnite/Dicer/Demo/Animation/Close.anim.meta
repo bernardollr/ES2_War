@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 2c9543f3ea23cc14094a302714187e46
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 228938
+  packageName: Dice Generator
+  packageVersion: 1.0.0
+  assetPath: Assets/ZeusUnite/Dicer/Demo/Animation/Close.anim
+  uploadId: 518195

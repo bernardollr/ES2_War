@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 2aa0ecc8b4770564f820db44d7e2c542
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 228938
+  packageName: Dice Generator
+  packageVersion: 1.0.0
+  assetPath: Assets/ZeusUnite/Dicer/Demo/Images/License_Readme.txt
+  uploadId: 518195

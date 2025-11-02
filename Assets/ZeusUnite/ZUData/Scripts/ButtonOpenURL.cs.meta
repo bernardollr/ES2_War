@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 182350d15fed1bb40a18729f4e3a1bb3
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 228938
+  packageName: Dice Generator
+  packageVersion: 1.0.0
+  assetPath: Assets/ZeusUnite/ZUData/Scripts/ButtonOpenURL.cs
+  uploadId: 518195
