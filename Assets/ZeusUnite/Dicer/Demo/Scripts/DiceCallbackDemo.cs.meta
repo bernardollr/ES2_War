@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 09caec09fc0e23243a8d60ab4d489f9b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 228938
+  packageName: Dice Generator
+  packageVersion: 1.0.0
+  assetPath: Assets/ZeusUnite/Dicer/Demo/Scripts/DiceCallbackDemo.cs
+  uploadId: 518195

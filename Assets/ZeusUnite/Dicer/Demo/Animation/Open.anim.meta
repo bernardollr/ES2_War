@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 5881ede9bd269f34ea7ed9e1192dafbb
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 228938
+  packageName: Dice Generator
+  packageVersion: 1.0.0
+  assetPath: Assets/ZeusUnite/Dicer/Demo/Animation/Open.anim
+  uploadId: 518195
