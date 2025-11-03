@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro; // ADICIONADO: Necessário para o contador de texto
 
 public class TerritorioHandler : MonoBehaviour
 {
@@ -11,47 +12,119 @@ public class TerritorioHandler : MonoBehaviour
     [Header("Dados do Jogo")]
     public Player donoDoTerritorio;
     public int numeroDeTropas;
+    public Player playerDoTurno; // Controlado pelo GameManager
 
-    public Player playerDoTurno;
-
+    [Header("Componentes Visuais")]
     public BorderScript borderScript;
+    [Tooltip("O componente TextMeshPro que exibirá o número de tropas")]
+    public TextMeshProUGUI contadorTropasTexto; // Referência ao Contador_Text existente
 
-    private static TerritorioHandler territorioSelecionado = null;
+    // O GameManager agora controla quem está selecionado
+    // private static TerritorioHandler territorioSelecionado = null; // Removido, GameManager gerencia
 
     void Start()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        FindAndStoreNeighbors();
+        try
+        {
+            spriteRenderer = GetComponent<SpriteRenderer>();
+            if (spriteRenderer == null)
+            {
+                Debug.LogWarning($"SpriteRenderer não encontrado em {gameObject.name}");
+            }
+
+            FindAndStoreNeighbors();
+            AtualizarVisual(); // Garante que o contador apareça no início
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Erro no Start de {gameObject.name}: {e.Message}");
+        }
     }
 
     void FindAndStoreNeighbors()
     {
-        vizinhos = new List<TerritorioHandler>();
-        List<Collider2D> collidingColliders = new List<Collider2D>();
-        ContactFilter2D filter = ContactFilter2D.noFilter;
-        GetComponent<Collider2D>().Overlap(filter, collidingColliders);
-
-        foreach (var collider in collidingColliders)
+        try
         {
-            if (collider.gameObject == gameObject) continue;
-            TerritorioHandler neighbor = collider.GetComponent<TerritorioHandler>();
-            if (neighbor != null) vizinhos.Add(neighbor);
+            vizinhos = new List<TerritorioHandler>();
+            var collider = GetComponent<Collider2D>();
+            if (collider == null)
+            {
+                Debug.LogError($"Collider2D não encontrado em {gameObject.name}");
+                return;
+            }
+
+            List<Collider2D> collidingColliders = new List<Collider2D>();
+            ContactFilter2D filter = ContactFilter2D.noFilter;
+            collider.Overlap(filter, collidingColliders);
+
+            foreach (var otherCollider in collidingColliders)
+            {
+                if (otherCollider == null || otherCollider.gameObject == gameObject) continue;
+                TerritorioHandler neighbor = otherCollider.GetComponent<TerritorioHandler>();
+                if (neighbor != null) vizinhos.Add(neighbor);
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Erro ao buscar vizinhos em {gameObject.name}: {e.Message}");
+            vizinhos = new List<TerritorioHandler>();
         }
     }
 
+    // MODIFICADO: Esta é a função chave para o contador
     public void AtualizarVisual()
     {
-        if (spriteRenderer == null)
-            spriteRenderer = GetComponent<SpriteRenderer>();
+        try
+        {
+            if (spriteRenderer == null)
+            {
+                spriteRenderer = GetComponent<SpriteRenderer>();
+                if (spriteRenderer == null)
+                {
+                    Debug.LogError($"SpriteRenderer não encontrado em {gameObject.name}");
+                    return;
+                }
+            }
 
-        if (donoDoTerritorio != null)
-        {
-            spriteRenderer.color = donoDoTerritorio.cor;
-            Debug.Log($"[Visual] Território '{name}' agora é do {donoDoTerritorio.nome} e pintado de {donoDoTerritorio.cor}");
+            if (donoDoTerritorio != null)
+            {
+                spriteRenderer.color = donoDoTerritorio.cor;
+            }
+            else
+            {
+                spriteRenderer.color = Color.gray;
+            }
+
+            // Atualiza o texto do contador na tela
+            if (contadorTropasTexto != null)
+            {
+                contadorTropasTexto.text = numeroDeTropas.ToString();
+            }
+            else
+            {
+                // Tenta encontrar o contador no caminho padrão
+                Transform exercitoVisual = transform.Find("ExercitoVisual");
+                if (exercitoVisual != null)
+                {
+                    Transform contadorCanvas = exercitoVisual.Find("ContadorCanvas");
+                    if (contadorCanvas != null)
+                    {
+                        Transform contadorText = contadorCanvas.Find("Contador_Text");
+                        if (contadorText != null)
+                        {
+                            contadorTropasTexto = contadorText.GetComponent<TextMeshProUGUI>();
+                            if (contadorTropasTexto != null)
+                            {
+                                contadorTropasTexto.text = numeroDeTropas.ToString();
+                            }
+                        }
+                    }
+                }
+            }
         }
-        else
+        catch (System.Exception e)
         {
-            spriteRenderer.color = Color.gray;
+            Debug.LogError($"Erro ao atualizar visual em {gameObject.name}: {e.Message}");
         }
     }
 
@@ -60,6 +133,7 @@ public class TerritorioHandler : MonoBehaviour
         CliqueEsquerdo();
     }
 
+    // MODIFICADO: Lógica de clique drasticamente simplificada
     void CliqueEsquerdo()
     {
         if (Mouse.current.leftButton.wasPressedThisFrame)
@@ -69,83 +143,52 @@ public class TerritorioHandler : MonoBehaviour
 
             Collider2D col = GetComponent<Collider2D>();
 
+            // Se o clique foi neste collider específico
             if (col == Physics2D.OverlapPoint(mousePos2D))
             {
-                // Clique em território do jogador atual
-                if (donoDoTerritorio == playerDoTurno)
+                // Apenas informa o GameManager. 
+                // O GameManager decide o que fazer (Alocar, Atacar, Selecionar, etc.)
+                if (GameManager.instance != null)
                 {
-                    if (territorioSelecionado != null && territorioSelecionado != this)
-                    {
-                        territorioSelecionado.Desselecionar();
-                    }
-
-                    if (territorioSelecionado == this)
-                    {
-                        Desselecionar();
-                        territorioSelecionado = null;
-                    }
-                    else
-                    {
-                        Selecionar();
-                        territorioSelecionado = this;
-                    }
-                }
-                // Clique em território inimigo
-                else
-                {
-                    // Só ataca se houver um território selecionado do jogador atual e for vizinho
-                    if (territorioSelecionado != null && territorioSelecionado.vizinhos.Contains(this))
-                    {
-                        Atacar(territorioSelecionado, this);
-                    }
+                    GameManager.instance.OnTerritorioClicado(this);
                 }
             }
         }
     }
-    void Atacar(TerritorioHandler atacante, TerritorioHandler defensor)
+
+    // REMOVIDO: void Atacar(...) - Esta lógica agora está no GameManager/BattleManager
+
+    // Métodos auxiliares (agora são públicos)
+    public void Selecionar(bool highlightVizinhosInimigos)
     {
-        Debug.Log($"{atacante.name} ataca {defensor.name}!");
-
-        // Logica do ataque (atacante sempre vence para simplificar)
-        defensor.donoDoTerritorio = atacante.donoDoTerritorio;
-
-        defensor.AtualizarVisual();
-        defensor.borderScript.MudarCor(Color.white);
-        defensor.borderScript.AlternaVisibilidade();
-
-        // Dessseleciona todos
-        DesselecionarTodos();
-
-        // Troca de turno
-        GameManager.instance.TrocarTurno();
-    }
-
-    // Métodos auxiliares
-    void Selecionar()
-    {
-        borderScript.AlternaVisibilidade();
+        if (borderScript == null) return;
+        borderScript.AlternaVisibilidade(true); // Força a visibilidade
         borderScript.MudarCor(Color.green);
 
-        foreach (var vizinho in vizinhos)
+        if (highlightVizinhosInimigos)
         {
-            if (vizinho != null && vizinho.borderScript != null && vizinho.donoDoTerritorio != donoDoTerritorio)
+            foreach (var vizinho in vizinhos)
             {
-                vizinho.borderScript.AlternaVisibilidade();
-                vizinho.borderScript.MudarCor(Color.red);
+                if (vizinho != null && vizinho.borderScript != null && vizinho.donoDoTerritorio != donoDoTerritorio)
+                {
+                    vizinho.borderScript.AlternaVisibilidade(true);
+                    vizinho.borderScript.MudarCor(Color.red);
+                }
             }
         }
     }
 
-    void Desselecionar()
+    public void Desselecionar()
     {
-        borderScript.AlternaVisibilidade();
+        if (borderScript == null) return;
+        borderScript.AlternaVisibilidade(false);
         borderScript.MudarCor(Color.white);
 
         foreach (var vizinho in vizinhos)
         {
             if (vizinho != null && vizinho.borderScript != null && vizinho.donoDoTerritorio != donoDoTerritorio)
             {
-                vizinho.borderScript.AlternaVisibilidade();
+                vizinho.borderScript.AlternaVisibilidade(false);
                 vizinho.borderScript.MudarCor(Color.white);
             }
         }
@@ -153,23 +196,9 @@ public class TerritorioHandler : MonoBehaviour
 
     public static void DesselecionarTodos()
     {
-        if (territorioSelecionado != null)
+        if (GameManager.instance != null)
         {
-            territorioSelecionado.Desselecionar();
-            territorioSelecionado = null;
+            GameManager.instance.DesselecionarTerritorios();
         }
     }
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
