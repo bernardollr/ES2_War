@@ -2871,7 +2871,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -406, y: -273.8}
+  m_AnchoredPosition: {x: -505.8, y: -221.7}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &425516706
@@ -4022,15 +4022,23 @@ MonoBehaviour:
   jogador1:
     nome: Eugene Vinod
     cor: {r: 0, g: 0, b: 0, a: 0}
+    nomeColorido: 
   jogador2:
     nome: Boeres
     cor: {r: 0, g: 0, b: 0, a: 0}
+    nomeColorido: 
   jogadorAtual:
     nome: 
     cor: {r: 0, g: 0, b: 0, a: 0}
+    nomeColorido: 
+  faseAtual: 0
+  reforcosPendentes: 0
+  territorioSelecionado: {fileID: 0}
+  territorioAlvo: {fileID: 0}
   todosOsTerritorios: []
-  territorio: {fileID: 0}
   turnoText: {fileID: 1008602253}
+  botaoAvancarFase: {fileID: 0}
+  battleManager: {fileID: 1993202061}
 --- !u!4 &577911516
 Transform:
   m_ObjectHideFlags: 0
@@ -6812,7 +6820,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -234.4, y: -273.8}
+  m_AnchoredPosition: {x: -334.19998, y: -221.7}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1090259133
@@ -8405,7 +8413,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -886, y: -474}
+  m_AnchoredPosition: {x: 950, y: -57}
   m_SizeDelta: {x: -1655, y: -802.42}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1337276486
@@ -10651,6 +10659,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 0826d0d04b788254fa6f7b1d80703984, type: 3}
   - {fileID: 21300000, guid: 53fcfa883b563c04db84f473d4efe2a4, type: 3}
   painelBatalha: {fileID: 1337276484}
+  botaoFecharPainel: {fileID: 0}
   imagensDadosAtaque:
   - {fileID: 1569282150}
   - {fileID: 128487227}
@@ -10660,6 +10669,7 @@ MonoBehaviour:
   - {fileID: 127646725}
   textoResultadoBatalha: {fileID: 818176412}
   duracaoAnimacao: 1
+  delayResultado: 2
 --- !u!1 &2001535037
 GameObject:
   m_ObjectHideFlags: 0

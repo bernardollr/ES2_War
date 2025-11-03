@@ -316,7 +316,7 @@ public class GameManager : MonoBehaviour
                         
                         // No War, você só pode fazer UM remanejamento. 
                         // Avançamos para o próximo jogador.
-                        OnBotaoAvancarFaseClicado(); 
+                        //OnBotaoAvancarFaseClicado(); 
                     }
                 }
                 else

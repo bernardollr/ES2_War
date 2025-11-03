@@ -30,6 +30,10 @@ public class BattleManager : MonoBehaviour {
     [Header("Animação")]
     public float duracaoAnimacao = 1.0f;
 
+    // --- ADICIONE ESTA LINHA ---
+    [Tooltip("Tempo que o resultado da batalha fica na tela antes de fechar")]
+    public float delayResultado = 2.0f;
+
     void Awake()
     {
         if (instance == null) instance = this;
@@ -173,6 +177,8 @@ public class BattleManager : MonoBehaviour {
         defensor.AtualizarVisual();
         // --- Fim da Atualização ---
 
+        /*
+
         if (botaoFecharPainel != null)
             botaoFecharPainel.gameObject.SetActive(true);
 
@@ -180,6 +186,17 @@ public class BattleManager : MonoBehaviour {
         {
             // painel ficará aberto até o jogador fechar via botão
         }
+        */
+        // --- NOVO CÓDIGO (COM DELAY AUTOMÁTICO) ---
+
+        // 1. Espera por 'delayResultado' segundos (os 2 segundos que você queria)
+        // O jogador fica lendo o resultado na tela durante esse tempo.
+        yield return new WaitForSeconds(delayResultado);
+
+        // 2. Chama a função de fechar o painel automaticamente
+        FecharPainelBatalha();
+
+        // 3. O 'botaoFecharPainel' não é mais necessário para esta lógica.
 
         estaRolando = false;
     }
