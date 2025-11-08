@@ -41,10 +41,12 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI turnoText; 
     
     [Tooltip("Arraste o Botão 'Passar Turno / Próxima Fase'")]
-    public Button botaoAvancarFase; 
+    public Button botaoAvancarFase;
 
     [Tooltip("Arraste o seu BattleManager para cá")]
     public BattleManager battleManager;
+    
+    public TextMeshProUGUI botaoAvancarFaseTexto;
 
     void Awake()
     {
@@ -123,6 +125,7 @@ public class GameManager : MonoBehaviour
 
             case GamePhase.Ataque:
                 faseAtual = GamePhase.Remanejamento;
+                //botaoAvancarFase.text
                 Debug.Log("Fase alterada para: Remanejamento");
                 break;
 
@@ -348,28 +351,27 @@ public class GameManager : MonoBehaviour
 
     // Atualiza o texto para incluir a fase atual e os reforços
     public void AtualizarTextoDoTurno()
+{
+    if (turnoText == null || botaoAvancarFaseTexto == null) return;
+
+    string textoFase = faseAtual.ToString();
+
+    if (faseAtual == GamePhase.Alocacao)
     {
-        if (turnoText == null || botaoAvancarFase == null) return;
-        
-        string textoFase = faseAtual.ToString(); // Converte o Enum para String
-        var textoBotao = botaoAvancarFase.GetComponentInChildren<TextMeshProUGUI>();
-        
-        if (faseAtual == GamePhase.Alocacao)
-        {
-            turnoText.text = $"Turno de: {jogadorAtual.nomeColorido}\nFase: {textoFase} ({reforcosPendentes} Restantes)";
-            if(textoBotao != null) textoBotao.text = "Iniciar Ataques";
-        }
-        else if(faseAtual == GamePhase.Ataque)
-        {
-            turnoText.text = $"Turno de: {jogadorAtual.nomeColorido}\nFase: {textoFase}";
-            if(textoBotao != null) textoBotao.text = "Remanejar Tropas";
-        }
-        else // Remanejamento
-        {
-            turnoText.text = $"Turno de: {jogadorAtual.nomeColorido}\nFase: {textoFase}";
-            if(textoBotao != null) textoBotao.text = "Encerrar Turno";
-        }
+        turnoText.text = $"Turno de: {jogadorAtual.nomeColorido}\nFase: {textoFase} ({reforcosPendentes} Restantes)";
+        botaoAvancarFaseTexto.text = "Atacar";
     }
+    else if (faseAtual == GamePhase.Ataque)
+    {
+        turnoText.text = $"Turno de: {jogadorAtual.nomeColorido}\nFase: {textoFase}";
+        botaoAvancarFaseTexto.text = "Remanejar Tropas";
+    }
+    else if (faseAtual == GamePhase.Remanejamento)
+    {
+        turnoText.text = $"Turno de: {jogadorAtual.nomeColorido}\nFase: {textoFase}";
+        botaoAvancarFaseTexto.text = "Passar Seu Turno";
+    }
+}
     
     void DistribuirTerritoriosIniciais()
     {
