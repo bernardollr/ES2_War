@@ -37,16 +37,12 @@ public class GameManager : MonoBehaviour
     [Header("Referências da UI")]
     public List<TerritorioHandler> todosOsTerritorios;
     
-    [Tooltip("Arraste o Text (TMP) que mostra o turno/fase")]
-    public TextMeshProUGUI turnoText; 
-    
     [Tooltip("Arraste o Botão 'Passar Turno / Próxima Fase'")]
     public Button botaoAvancarFase;
 
     [Tooltip("Arraste o seu BattleManager para cá")]
     public BattleManager battleManager;
     
-    public TextMeshProUGUI botaoAvancarFaseTexto;
 
     void Awake()
     {
@@ -101,7 +97,7 @@ public class GameManager : MonoBehaviour
         reforcosPendentes = CalcularReforcos(jogadorAtual);
 
         Debug.Log($"{jogadorAtual.nome} iniciou o turno. Reforços: {reforcosPendentes}");
-        AtualizarTextoDoTurno();
+        UIManager.instance.AtualizarPainelStatus(faseAtual, jogadorAtual);
     }
 
     // Função chamada pelo botão "Próxima Fase / Encerrar Turno"
@@ -133,7 +129,7 @@ public class GameManager : MonoBehaviour
                 MudarParaProximoJogador();
                 return; // Sai da função, MudarParaProximoJogador chamará IniciarNovoTurno()
         }
-        AtualizarTextoDoTurno();
+        UIManager.instance.AtualizarPainelStatus(faseAtual, jogadorAtual);
     }
 
     // Função que troca o jogador e inicia o próximo turno
@@ -152,7 +148,7 @@ public class GameManager : MonoBehaviour
         faseAtual = GamePhase.Ataque; // Volta para a fase de ataque
         DesselecionarTerritorios();
         ChecarVitoria(); // Verifica se o jogo acabou após a batalha
-        AtualizarTextoDoTurno();
+        UIManager.instance.AtualizarPainelStatus(faseAtual, jogadorAtual);
     }
 
     #endregion
@@ -193,7 +189,7 @@ public class GameManager : MonoBehaviour
             territorio.numeroDeTropas++;
             territorio.AtualizarVisual(); // Atualiza o contador na tela
             reforcosPendentes--;
-            AtualizarTextoDoTurno(); // Atualiza UI para mostrar reforços restantes
+            UIManager.instance.AtualizarPainelStatus(faseAtual, jogadorAtual); // Atualiza UI para mostrar reforços restantes
             Debug.Log($"Reforço alocado em {territorio.name}. Restam {reforcosPendentes}.");
         }
         else
@@ -349,30 +345,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // Atualiza o texto para incluir a fase atual e os reforços
-    public void AtualizarTextoDoTurno()
-{
-    if (turnoText == null || botaoAvancarFaseTexto == null) return;
-
-    string textoFase = faseAtual.ToString();
-
-    if (faseAtual == GamePhase.Alocacao)
-    {
-        turnoText.text = $"Turno de: {jogadorAtual.nomeColorido}\nFase: {textoFase} ({reforcosPendentes} Restantes)";
-        botaoAvancarFaseTexto.text = "Atacar";
-    }
-    else if (faseAtual == GamePhase.Ataque)
-    {
-        turnoText.text = $"Turno de: {jogadorAtual.nomeColorido}\nFase: {textoFase}";
-        botaoAvancarFaseTexto.text = "Remanejar Tropas";
-    }
-    else if (faseAtual == GamePhase.Remanejamento)
-    {
-        turnoText.text = $"Turno de: {jogadorAtual.nomeColorido}\nFase: {textoFase}";
-        botaoAvancarFaseTexto.text = "Passar Seu Turno";
-    }
-}
-    
     void DistribuirTerritoriosIniciais()
     {
         List<TerritorioHandler> territoriosEmbaralhados = todosOsTerritorios.OrderBy(a => Random.value).ToList();
