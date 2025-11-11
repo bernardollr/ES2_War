@@ -42,6 +42,9 @@ public class GameManager : MonoBehaviour
 
     [Tooltip("Arraste o seu BattleManager para cá")]
     public BattleManager battleManager;
+
+    [Tooltip("Arraste o Texto (TMP) que mostra os reforços pendentes")]
+    public TextMeshProUGUI textoReforcosPendentes;
     
 
     void Awake()
@@ -95,6 +98,11 @@ public class GameManager : MonoBehaviour
 
         faseAtual = GamePhase.Alocacao;
         reforcosPendentes = CalcularReforcos(jogadorAtual);
+
+        if (textoReforcosPendentes != null)
+        {
+            textoReforcosPendentes.text = reforcosPendentes.ToString();
+        }
 
         Debug.Log($"{jogadorAtual.nome} iniciou o turno. Reforços: {reforcosPendentes}");
         UIManager.instance.AtualizarPainelStatus(faseAtual, jogadorAtual);
@@ -189,6 +197,12 @@ public class GameManager : MonoBehaviour
             territorio.numeroDeTropas++;
             territorio.AtualizarVisual(); // Atualiza o contador na tela
             reforcosPendentes--;
+
+            if (textoReforcosPendentes != null)
+            {
+                textoReforcosPendentes.text = reforcosPendentes.ToString();
+            }
+            
             UIManager.instance.AtualizarPainelStatus(faseAtual, jogadorAtual); // Atualiza UI para mostrar reforços restantes
             Debug.Log($"Reforço alocado em {territorio.name}. Restam {reforcosPendentes}.");
         }
