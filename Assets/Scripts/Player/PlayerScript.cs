@@ -8,12 +8,19 @@ public class Player
     public Color cor;
     public string nomeColorido; // Para uso no TextMeshPro
 
-    public Player(string nome, Color cor)
+    public string nomeDaCor; // <-- ADICIONE ESTA LINHA (para lógica interna)
+
+    public Objetivo objetivoSecreto;
+
+    // Construtor atualizado para receber o nome da cor
+    public Player(string nome, Color cor, string nomeDaCor) // <-- ADICIONE AQUI
     {
         this.nome = nome;
         this.cor = cor;
+        this.nomeDaCor = nomeDaCor; // <-- ADICIONE ESTA LINHA
+        this.objetivoSecreto = null;
 
-        // Cria uma string rica em cor para a UI
+        // Sua lógica de nome colorido continua perfeita
         string hexCor = ColorUtility.ToHtmlStringRGB(cor);
         this.nomeColorido = $"<color=#{hexCor}>{nome}</color>";
     }

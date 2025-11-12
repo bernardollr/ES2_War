@@ -43,9 +43,11 @@ public class UIManager : MonoBehaviour
             painelStatusTurno.SetActive(false);
         }
     }
-    public void AbrirPopUpObjetivo() {
+    public void AbrirPopUpObjetivo()
+    {
         popUpObjetivo.SetActive(true);
-        textoObjetivo.text = objetivoAtualDebug;
+        // Puxa a descrição do objetivo secreto do jogador atual direto do GameManager
+        textoObjetivo.text = GameManager.instance.jogadorAtual.objetivoSecreto.Descricao; // <-- LINHA NOVA
     }
 
     public void FecharPopUpObjetivo() {
