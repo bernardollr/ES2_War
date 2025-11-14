@@ -438,7 +438,7 @@ public class GameManager : MonoBehaviour
         // 2. Adicionar outros objetivos genéricos
         int totalTerritorios = todosOsTerritorios.Count;
         poolDeObjetivos.Add(new ObjetivoConquistarNTerritorios(totalTerritorios, "Conquistar o mundo (todos os territórios)"));
-        poolDeObjetivos.Add(new ObjetivoConquistarNTerritorios(6, "Conquistar 18 territórios")); // Exemplo
+        poolDeObjetivos.Add(new ObjetivoConquistarNTerritorios(6, "Conquistar 6 territórios")); // Exemplo
         // Adicione objetivos de continente aqui...
 
         // 3. Embaralhar a lista
