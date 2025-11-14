@@ -12,7 +12,7 @@ namespace ZeusUnite.Dice
             get
             {
                 if (instance == null)
-                    instance = FindObjectOfType<Dicer>();
+                    instance = FindFirstObjectByType<Dicer>();
 
                 if (instance == null)
                 {

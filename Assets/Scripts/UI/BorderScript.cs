@@ -8,17 +8,17 @@ public class BorderScript : MonoBehaviour
     {
         if (spriteRend == null)
             spriteRend = GetComponent<SpriteRenderer>();
-        spriteRend.color = Color.white; // Cor padrão branca
+        spriteRend.color = Color.white; // Cor padrï¿½o branca
 
         spriteRend.enabled = false;
     }
 
-    public void AlternaVisibilidade()
+    public void AlternaVisibilidade(bool visivel)
     {
-        spriteRend.enabled = !spriteRend.enabled;
+        spriteRend.enabled = visivel;
     }
 
-    // Novo método para mudar cor
+    // Novo mï¿½todo para mudar cor
     public void MudarCor(Color novaCor)
     {
         if (spriteRend != null)
