@@ -3194,7 +3194,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 513, y: -403.64}
+  m_AnchoredPosition: {x: 545, y: -310.77}
   m_SizeDelta: {x: 160, y: 57.6479}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &425516706
@@ -4342,18 +4342,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc49425ee14761a4889e3a854fcf07f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  jogador1:
-    nome: Eugene Vinod
-    cor: {r: 0, g: 0, b: 0, a: 0}
-    nomeColorido: 
-  jogador2:
-    nome: Boeres
-    cor: {r: 0, g: 0, b: 0, a: 0}
-    nomeColorido: 
+  todosOsJogadores: []
   jogadorAtual:
     nome: 
     cor: {r: 0, g: 0, b: 0, a: 0}
     nomeColorido: 
+    nomeDaCor: 
   faseAtual: 0
   reforcosPendentes: 0
   territorioSelecionado: {fileID: 0}
@@ -8777,7 +8771,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 759, y: -236.03}
+  m_AnchoredPosition: {x: 807, y: -236.03}
   m_SizeDelta: {x: -1655, y: -802.42}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1337276486
@@ -9223,7 +9217,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 715.728, y: 393}
+  m_AnchoredPosition: {x: 676.39, y: 261}
   m_SizeDelta: {x: -1389.3395, y: -825.2322}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1504074629
@@ -9585,7 +9579,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -775, y: -393}
+  m_AnchoredPosition: {x: -837, y: -270}
   m_SizeDelta: {x: 200.2016, y: 176.6462}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1608253305
