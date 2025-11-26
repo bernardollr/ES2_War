@@ -1,4 +1,3 @@
-// GameManager.cs
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -19,10 +18,17 @@ public class GameManager : MonoBehaviour
         JogoPausado     // Usado durante a batalha ou no fim do jogo
     }
 
+    [System.Serializable]
+    public struct InfoCorJogador
+    {
+        public string nome;
+        public Color cor;
+    }
+
     [Header("Controle de Jogo")]
-    public List<Player> todosOsJogadores; // <-- MUDANÇA: Agora é uma lista
+    public List<Player> todosOsJogadores;
     public Player jogadorAtual;
-    private int indiceJogadorAtual = 0; // <-- MUDANÇA: Controla a "roda" de jogadores
+    private int indiceJogadorAtual = 0;
 
     [Tooltip("A fase atual do turno do jogador")]
     public GamePhase faseAtual;
@@ -30,25 +36,22 @@ public class GameManager : MonoBehaviour
     [Tooltip("Quantas tropas o jogador ainda pode alocar")]
     public int reforcosPendentes;
 
+    [Header("Configuração de IA e Cores")]
+    public AIController aiController; // <-- ARRASTE SEU SCRIPT AICONTROLLER AQUI
+    public List<InfoCorJogador> coresDisponiveis; // Será preenchida automaticamente se vazia
+
     [Header("Gerenciamento de Seleção")]
     public TerritorioHandler territorioSelecionado;
     public TerritorioHandler territorioAlvo;
 
     [Header("Gerenciamento de Objetivos")]
-    private List<Objetivo> poolDeObjetivos; // <-- NOVO: Lista de objetivos para sortear
+    private List<Objetivo> poolDeObjetivos;
 
     [Header("Referências da UI")]
     public List<TerritorioHandler> todosOsTerritorios;
-
-    [Tooltip("Arraste o Botão 'Passar Turno / Próxima Fase'")]
     public Button botaoAvancarFase;
-
-    [Tooltip("Arraste o seu BattleManager para cá")]
     public BattleManager battleManager;
-
-    [Tooltip("Arraste o Texto (TMP) que mostra os reforços pendentes")]
     public TextMeshProUGUI textoReforcosPendentes;
-
 
     void Awake()
     {
@@ -58,53 +61,88 @@ public class GameManager : MonoBehaviour
         if (battleManager == null)
         {
             battleManager = GetComponent<BattleManager>();
-            if (battleManager != null)
-                Debug.Log("BattleManager atribuído automaticamente a partir do mesmo GameObject.");
-            else
-                Debug.LogWarning("GameManager: battleManager não está atribuído no Inspector e não foi encontrado no mesmo GameObject.");
         }
     }
 
     void Start()
     {
-        // --- MUDANÇA: Criando N jogadores ---
-        todosOsJogadores = new List<Player>();
-        // (Lembre-se de ter seu Player.cs com o construtor (nome, cor, nomeDaCor))
-        todosOsJogadores.Add(new Player("Jogador 1", Color.blue, "Azul"));
-        todosOsJogadores.Add(new Player("Jogador 2", Color.red, "Vermelho"));
-        // Adicione quantos jogadores quiser aqui
+        // 1. Configura as cores padrão se não foram definidas no Inspector
+        InicializarCoresPadrao();
 
+        // 2. Inicializa lista e cria os jogadores
+        todosOsJogadores = new List<Player>();
+
+        // Cria o Jogador HUMANO (Player 1)
+        CriarJogador("Jogador 1", false); // false = não é IA
+
+        // Cria os Jogadores BOT (Preenche até ter 6 no total)
+        int totalJogadores = 6;
+        int contadorBots = 1;
+        while (todosOsJogadores.Count < totalJogadores)
+        {
+            CriarJogador($"CPU {contadorBots}", true); // true = é IA
+            contadorBots++;
+        }
+
+        // Configura o primeiro jogador
         jogadorAtual = todosOsJogadores[0];
         indiceJogadorAtual = 0;
-        // ------------------------------------
 
+        // 3. Busca territórios e distribui
         todosOsTerritorios = FindObjectsByType<TerritorioHandler>(FindObjectsSortMode.None).ToList();
-        DistribuirTerritoriosIniciais(); // Atualizado para N jogadores
+        DistribuirTerritoriosIniciais();
 
-        // --- NOVO: Lógica de Objetivos ---
+        // 4. Objetivos
         InicializarEAssinlarObjetivos();
-        // ---------------------------------
 
-        // Inicia o primeiro turno
+        // 5. Inicia o jogo
+        Debug.Log("GameManager iniciado com " + todosOsJogadores.Count + " jogadores.");
         IniciarNovoTurno();
+    }
 
-        Debug.Log("GameManager iniciado.");
-        PrintTerritoriosPorJogador(); // Atualizado para N jogadores
+    // Função auxiliar para criar jogadores com cores únicas
+    void CriarJogador(string nomeBase, bool ehIA)
+    {
+        if (coresDisponiveis.Count == 0)
+        {
+            Debug.LogError("Acabaram as cores disponíveis! Não é possível criar mais jogadores.");
+            return;
+        }
+
+        // Pega a primeira cor da lista e remove para ninguém mais usar
+        InfoCorJogador info = coresDisponiveis[0];
+        coresDisponiveis.RemoveAt(0);
+
+        // Instancia o Player (Certifique-se que seu Player.cs tem o bool ehIA no construtor)
+        Player novoPlayer = new Player(nomeBase, info.cor, info.nome, ehIA);
+        todosOsJogadores.Add(novoPlayer);
+    }
+
+    void InicializarCoresPadrao()
+    {
+        if (coresDisponiveis == null || coresDisponiveis.Count == 0)
+        {
+            coresDisponiveis = new List<InfoCorJogador>
+            {
+                new InfoCorJogador { nome = "Azul", cor = Color.blue },
+                new InfoCorJogador { nome = "Vermelho", cor = Color.red },
+                new InfoCorJogador { nome = "Preto", cor = Color.black },
+                new InfoCorJogador { nome = "Branco", cor = Color.white },
+                new InfoCorJogador { nome = "Verde", cor = Color.green },
+                new InfoCorJogador { nome = "Amarelo", cor = Color.yellow }
+            };
+        }
     }
 
     #region LÓGICA DE TURNO E FASES
 
-    // Calcula quantos exércitos de reforço o jogador deve receber
     public int CalcularReforcos(Player player)
     {
         int numTerritorios = todosOsTerritorios.Count(t => t.donoDoTerritorio == player);
         int reforcosBase = Mathf.FloorToInt(numTerritorios / 3f);
-
-        // Regra do War: mínimo de 3 exércitos
         return Mathf.Max(3, reforcosBase);
     }
 
-    // Inicia o turno na fase de Alocação
     public void IniciarNovoTurno()
     {
         DesselecionarTerritorios();
@@ -114,21 +152,35 @@ public class GameManager : MonoBehaviour
         reforcosPendentes = CalcularReforcos(jogadorAtual);
 
         if (textoReforcosPendentes != null)
-        {
             textoReforcosPendentes.text = reforcosPendentes.ToString();
-        }
 
-        Debug.Log($"{jogadorAtual.nome} iniciou o turno. Reforços: {reforcosPendentes}");
         UIManager.instance.AtualizarPainelStatus(faseAtual, jogadorAtual);
+        Debug.Log($"--- TURNO DE: {jogadorAtual.nome} ({jogadorAtual.nomeDaCor}) --- Reforços: {reforcosPendentes}");
+
+        // --- INTEGRAÇÃO COM IA ---
+        if (jogadorAtual.ehIA)
+        {
+            if (aiController != null)
+            {
+                // Inicia o cérebro da IA
+                aiController.IniciarTurnoIA(jogadorAtual);
+            }
+            else
+            {
+                Debug.LogError("AIController não está atribuído no GameManager!");
+            }
+        }
     }
 
-    // Função chamada pelo botão "Próxima Fase / Encerrar Turno"
     public void OnBotaoAvancarFaseClicado()
     {
-        // Proteção: Não pode sair da fase de alocação com tropas pendentes
+        // Se for turno da IA, o botão (se clicado manualmente por bug) não deve funcionar,
+        // mas a IA chama essa função via código, então permitimos se a origem for código.
+        // Como não dá pra saber a origem fácil, confiamos na lógica do AIController.
+
         if (faseAtual == GamePhase.Alocacao && reforcosPendentes > 0)
         {
-            Debug.Log("Alerta: Você deve alocar todas as suas tropas de reforço antes de avançar!");
+            Debug.Log("Alerta: Aloque todas as tropas antes de avançar!");
             return;
         }
 
@@ -138,58 +190,53 @@ public class GameManager : MonoBehaviour
         {
             case GamePhase.Alocacao:
                 faseAtual = GamePhase.Ataque;
-                Debug.Log("Fase alterada para: Ataque");
                 break;
 
             case GamePhase.Ataque:
                 faseAtual = GamePhase.Remanejamento;
-                Debug.Log("Fase alterada para: Remanejamento");
                 break;
 
             case GamePhase.Remanejamento:
                 MudarParaProximoJogador();
-                return; // Sai da função, MudarParaProximoJogador chamará IniciarNovoTurno()
+                return;
         }
         UIManager.instance.AtualizarPainelStatus(faseAtual, jogadorAtual);
     }
 
-    // --- MUDANÇA: Lógica de "roda" para N jogadores ---
     void MudarParaProximoJogador()
     {
-        // Avança o índice e dá a volta se chegar ao fim
         indiceJogadorAtual = (indiceJogadorAtual + 1) % todosOsJogadores.Count;
         jogadorAtual = todosOsJogadores[indiceJogadorAtual];
 
-        Debug.Log("--- FIM DO TURNO. AGORA É O TURNO DE: " + jogadorAtual.nome + " ---");
+        ChecarVitoria();
 
-        ChecarVitoria(); // Checa no início do próximo turno
-
-        if (faseAtual != GamePhase.JogoPausado) // Só inicia um novo turno se o jogo não acabou
+        if (faseAtual != GamePhase.JogoPausado)
         {
             IniciarNovoTurno();
         }
     }
 
-    // Chamada pelo BattleManager quando a batalha termina
     public void BatalhaConcluida()
     {
-        faseAtual = GamePhase.Ataque; // Volta para a fase de ataque
+        faseAtual = GamePhase.Ataque;
         DesselecionarTerritorios();
-        ChecarVitoria(); // Verifica se o jogo acabou após a batalha
+        ChecarVitoria();
         UIManager.instance.AtualizarPainelStatus(faseAtual, jogadorAtual);
     }
 
     #endregion
 
-    #region LÓGICA DE CLIQUES (O Cérebro)
+    #region LÓGICA DE CLIQUES
 
-    // Esta é a função central que o TerritorioHandler vai chamar
-    // (NENHUMA MUDANÇA NECESSÁRIA AQUI - JÁ USAVA 'jogadorAtual')
     public void OnTerritorioClicado(TerritorioHandler territorioClicado)
     {
-        if (faseAtual == GamePhase.JogoPausado) return; // Não faz nada se estiver em batalha
+        if (faseAtual == GamePhase.JogoPausado) return;
 
-        // Roda a lógica da fase atual
+        // --- BLOQUEIO PARA IA ---
+        // Se for a vez da IA, o jogador humano não pode clicar em nada
+        if (jogadorAtual.ehIA) return;
+        // ------------------------
+
         switch (faseAtual)
         {
             case GamePhase.Alocacao:
@@ -204,101 +251,66 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // LÓGICA DE ALOCAÇÃO (Sem mudanças)
     void HandleCliqueAlocacao(TerritorioHandler territorio)
     {
-        if (reforcosPendentes <= 0)
-        {
-            Debug.Log("Você não tem mais reforços para alocar.");
-            return;
-        }
+        if (reforcosPendentes <= 0) return;
 
         if (territorio.donoDoTerritorio == jogadorAtual)
         {
             territorio.numeroDeTropas++;
-            territorio.AtualizarVisual(); // Atualiza o contador na tela
+            territorio.AtualizarVisual();
             reforcosPendentes--;
 
             if (textoReforcosPendentes != null)
-            {
                 textoReforcosPendentes.text = reforcosPendentes.ToString();
-            }
 
-            UIManager.instance.AtualizarPainelStatus(faseAtual, jogadorAtual); // Atualiza UI para mostrar reforços restantes
-            Debug.Log($"Reforço alocado em {territorio.name}. Restam {reforcosPendentes}.");
-        }
-        else
-        {
-            Debug.Log("Você só pode alocar tropas em seus próprios territórios.");
+            UIManager.instance.AtualizarPainelStatus(faseAtual, jogadorAtual);
         }
     }
 
-    // LÓGICA DE ATAQUE (Sem mudanças)
     void HandleCliqueAtaque(TerritorioHandler territorioClicado)
     {
-        if (battleManager == null)
-        {
-            Debug.LogError("BattleManager não está configurado no GameManager! Configure-o no Inspector.");
-            return;
-        }
-
         if (territorioSelecionado == null)
         {
-            // 1. Primeiro clique: Selecionar território de origem (ataque)
             if (territorioClicado.donoDoTerritorio == jogadorAtual)
             {
-                if (territorioClicado.numeroDeTropas > 1) // Precisa de pelo menos 2 tropas para atacar
+                if (territorioClicado.numeroDeTropas > 1)
                 {
                     territorioSelecionado = territorioClicado;
-                    territorioSelecionado.Selecionar(true); // Feedback visual
+                    territorioSelecionado.Selecionar(true);
                 }
-                else
-                {
-                    Debug.Log("Você precisa de pelo menos 2 tropas para atacar deste território.");
-                }
-            }
-            else
-            {
-                Debug.Log("Selecione um território seu para atacar.");
             }
         }
         else
         {
-            // 2. Segundo clique:
             if (territorioClicado == territorioSelecionado)
             {
-                // Clicou no mesmo território: Desselecionar
                 DesselecionarTerritorios();
             }
             else if (territorioClicado.donoDoTerritorio != jogadorAtual)
             {
-                // Clicou no inimigo: Definir como alvo
                 territorioAlvo = territorioClicado;
-
-                // Verifica se são vizinhos
-                if (territorioSelecionado != null && territorioSelecionado.vizinhos.Contains(territorioAlvo))
+                if (territorioSelecionado.vizinhos.Contains(territorioAlvo))
                 {
-                    faseAtual = GamePhase.JogoPausado; // Pausa o jogo
+                    faseAtual = GamePhase.JogoPausado;
                     try
                     {
                         battleManager.IniciarBatalha(territorioSelecionado, territorioAlvo);
                     }
                     catch (System.Exception e)
                     {
-                        Debug.LogError($"Erro ao iniciar batalha: {e.Message}");
-                        faseAtual = GamePhase.Ataque; // Volta para a fase de ataque se der erro
+                        Debug.LogError($"Erro batalha: {e.Message}");
+                        faseAtual = GamePhase.Ataque;
                         DesselecionarTerritorios();
                     }
                 }
                 else
                 {
-                    Debug.Log("Territórios não são vizinhos!");
                     DesselecionarTerritorios();
                 }
             }
             else if (territorioClicado.donoDoTerritorio == jogadorAtual)
             {
-                // Mudou de ideia e clicou em outro território seu
                 DesselecionarTerritorios();
                 if (territorioClicado.numeroDeTropas > 1)
                 {
@@ -309,53 +321,39 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // LÓGICA DE REMANEJAMENTO (Sem mudanças)
     void HandleCliqueRemanejamento(TerritorioHandler territorioClicado)
     {
         if (territorioSelecionado == null)
         {
-            // 1. Primeiro clique: Selecionar origem (tem que ser seu e ter tropas extras)
             if (territorioClicado.donoDoTerritorio == jogadorAtual && territorioClicado.numeroDeTropas > 1)
             {
                 territorioSelecionado = territorioClicado;
-                territorioSelecionado.Selecionar(false); // Seleciona, mas sem highlight vermelho
+                territorioSelecionado.Selecionar(false);
             }
         }
         else
         {
-            // 2. Segundo clique:
             if (territorioClicado == territorioSelecionado)
             {
-                DesselecionarTerritorios(); // Desseleciona
+                DesselecionarTerritorios();
             }
             else if (territorioClicado.donoDoTerritorio == jogadorAtual)
             {
-                // Clicou em outro território seu: Definir como alvo
                 territorioAlvo = territorioClicado;
-
-                // TODO: Verificar se há um *caminho* de territórios amigos (não apenas vizinhos)
                 if (territorioSelecionado.vizinhos.Contains(territorioAlvo))
                 {
-                    // IMPLEMENTAÇÃO SIMPLES: Move 1 tropa
-                    // O ideal seria abrir um pop-up perguntando quantas tropas mover
                     if (territorioSelecionado.numeroDeTropas > 1)
                     {
                         territorioSelecionado.numeroDeTropas--;
                         territorioAlvo.numeroDeTropas++;
                         territorioSelecionado.AtualizarVisual();
                         territorioAlvo.AtualizarVisual();
-
-                        Debug.Log($"Moveu 1 tropa de {territorioSelecionado.name} para {territorioAlvo.name}");
                         DesselecionarTerritorios();
-
-                        // No War, você só pode fazer UM remanejamento. 
-                        // Força o avanço da fase
                         OnBotaoAvancarFaseClicado();
                     }
                 }
                 else
                 {
-                    Debug.Log("Não é possível remanejar para um território não adjacente.");
                     DesselecionarTerritorios();
                 }
             }
@@ -375,43 +373,23 @@ public class GameManager : MonoBehaviour
         }
         if (territorioAlvo != null)
         {
-            // O alvo não é "selecionado", apenas resetamos a referência
             territorioAlvo = null;
         }
     }
 
-    // --- MUDANÇA: Atualizado para N jogadores ---
     void DistribuirTerritoriosIniciais()
     {
         List<TerritorioHandler> territoriosEmbaralhados = todosOsTerritorios.OrderBy(a => Random.value).ToList();
         int jogadorIndex = 0;
-        int numJogadores = todosOsJogadores.Count; // Pega o número de jogadores
+        int numJogadores = todosOsJogadores.Count;
 
         foreach (var territorio in territoriosEmbaralhados)
         {
-            // Lógica de distribuição para N jogadores
             Player dono = todosOsJogadores[jogadorIndex % numJogadores];
-
             territorio.donoDoTerritorio = dono;
             territorio.numeroDeTropas = 1;
-            territorio.AtualizarVisual(); // Garante que o contador inicial (1) apareça
+            territorio.AtualizarVisual();
             jogadorIndex++;
-        }
-        Debug.Log("Territórios iniciais distribuídos!");
-    }
-
-    // --- MUDANÇA: Atualizado para N jogadores ---
-    void PrintTerritoriosPorJogador()
-    {
-        // Itera sobre a lista de jogadores
-        foreach (Player p in todosOsJogadores)
-        {
-            Debug.Log($"=== Territórios do {p.nome} ===");
-            // Filtra os territórios para cada jogador
-            foreach (var t in todosOsTerritorios.Where(t => t.donoDoTerritorio == p))
-            {
-                Debug.Log($"- {t.name} com {t.numeroDeTropas} tropa(s)");
-            }
         }
     }
 
@@ -423,28 +401,23 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // --- NOVO: Função de distribuição de objetivos ---
     void InicializarEAssinlarObjetivos()
     {
         poolDeObjetivos = new List<Objetivo>();
 
-        // 1. Criar um objetivo de "Destruir" para CADA jogador
+        // Objetivos de Destruir
         foreach (Player jogadorAlvo in todosOsJogadores)
         {
-            // (Isso assume que 'ObjetivoDestruirJogador.cs' está como discutimos)
             poolDeObjetivos.Add(new ObjetivoDestruirJogador(jogadorAlvo));
         }
 
-        // 2. Adicionar outros objetivos genéricos
+        // Objetivos de Conquista
         int totalTerritorios = todosOsTerritorios.Count;
-        poolDeObjetivos.Add(new ObjetivoConquistarNTerritorios(totalTerritorios, "Conquistar o mundo (todos os territórios)"));
-        poolDeObjetivos.Add(new ObjetivoConquistarNTerritorios(6, "Conquistar 6 territórios")); // Exemplo
-        // Adicione objetivos de continente aqui...
+        poolDeObjetivos.Add(new ObjetivoConquistarNTerritorios(totalTerritorios, "Conquistar o mundo"));
+        poolDeObjetivos.Add(new ObjetivoConquistarNTerritorios(24, "Conquistar 24 territórios"));
 
-        // 3. Embaralhar a lista
         List<Objetivo> objetivosEmbaralhados = poolDeObjetivos.OrderBy(o => Random.value).ToList();
 
-        // 4. Distribuir, garantindo que ninguém pegue o objetivo de se destruir
         for (int i = 0; i < todosOsJogadores.Count; i++)
         {
             Player jogador = todosOsJogadores[i];
@@ -455,54 +428,47 @@ public class GameManager : MonoBehaviour
             {
                 Objetivo objCandidato = objetivosEmbaralhados[objIndex];
 
-                // É um objetivo de Destruir?
                 if (objCandidato is ObjetivoDestruirJogador objDestruir)
                 {
-                    // Se for, é um objetivo de destruir a si mesmo?
                     if (objDestruir.JogadorAlvo == jogador)
                     {
-                        // Sim, é. Pula este objetivo.
                         objIndex++;
                         continue;
                     }
                 }
 
-                // Se chegou aqui, o objetivo é válido
                 objParaAssinlar = objCandidato;
-                objetivosEmbaralhados.RemoveAt(objIndex); // Remove para não ser pego por outro
+                objetivosEmbaralhados.RemoveAt(objIndex);
             }
 
             if (objParaAssinlar == null)
             {
-                Debug.LogError($"Não foi possível encontrar um objetivo válido para {jogador.nome}!");
-                // Damos um objetivo padrão para evitar erros
-                objParaAssinlar = new ObjetivoConquistarNTerritorios(10, "Conquistar 10 territórios");
+                objParaAssinlar = new ObjetivoConquistarNTerritorios(15, "Conquistar 15 territórios");
             }
 
             jogador.objetivoSecreto = objParaAssinlar;
-            Debug.Log($"{jogador.nome} recebeu o objetivo: {jogador.objetivoSecreto.Descricao}");
         }
     }
 
-
-    // --- MUDANÇA: Lógica de vitória atualizada para checar objetivos ---
     public void ChecarVitoria()
     {
         if (todosOsTerritorios.Count == 0) return;
 
-        // --- LÓGICA DE OBJETIVO SECRETO ---
-        // Itera por todos os jogadores para ver se algum deles venceu
         foreach (Player jogador in todosOsJogadores)
         {
-            // (Isso assume que 'Objetivo.cs' e suas classes filhas estão corretas)
+            // Se o jogador foi eliminado (0 territórios), pula a checagem dele
+            // (Opcional: você pode remover o jogador da lista se quiser)
+            int numTerritorios = todosOsTerritorios.Count(t => t.donoDoTerritorio == jogador);
+            if (numTerritorios == 0) continue;
+
             if (jogador.objetivoSecreto != null && jogador.objetivoSecreto.FoiConcluido(jogador, this))
             {
                 AnunciarVencedor(jogador);
-                return; // Jogo acaba
+                return;
             }
         }
 
-        // --- LÓGICA DE DOMINAÇÃO TOTAL (Fallback) ---
+        // Fallback: Dominação total
         Player donoReferencia = todosOsTerritorios[0].donoDoTerritorio;
         bool todosIguais = true;
         foreach (var territorio in todosOsTerritorios)
@@ -520,18 +486,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // --- NOVO: Função auxiliar para anunciar o vencedor ---
     void AnunciarVencedor(Player vencedor)
     {
-        // Pausa o jogo para evitar mais cliques
         faseAtual = GamePhase.JogoPausado;
-
-        Debug.Log($"--- JOGO ACABOU! VENCEDOR: {vencedor.nome} ---");
-        Debug.Log($"Objetivo concluído: {vencedor.objetivoSecreto.Descricao}");
+        Debug.Log($"--- VENCEDOR: {vencedor.nome} ---");
 
         VencedorInfo.nomeVencedor = vencedor.nome;
         VencedorInfo.corVencedor = vencedor.cor;
-        SceneManager.LoadScene(2); // (Assumindo que a cena 2 é a tela de vitória)
+        SceneManager.LoadScene(2);
     }
 
     #endregion
