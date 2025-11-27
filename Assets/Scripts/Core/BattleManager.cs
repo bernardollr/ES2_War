@@ -202,14 +202,26 @@ public class BattleManager : MonoBehaviour {
     }
 
     // Função para quando o defensor perde todas as tropas
+    // Função para quando o defensor perde todas as tropas
     void ConquistarTerritorio(TerritorioHandler atacante, TerritorioHandler defensor)
     {
         Debug.Log($"{atacante.donoDoTerritorio.nome} conquistou {defensor.name}!");
         textoResultadoBatalha.text += $"\n{defensor.name} foi conquistado!";
         
-        // Troca o dono do território
+        // 1. Troca o dono do território
         defensor.donoDoTerritorio = atacante.donoDoTerritorio;
-        // Atualiza a cor (AtualizarVisual() fará isso)
+
+        // --- LIGAÇÃO COM O SISTEMA DE CARTAS ---
+        // Marca que o jogador realizou uma conquista.
+        // O GameManager lerá isso no fim do turno para dar a carta.
+        if (atacante.donoDoTerritorio != null)
+        {
+            atacante.donoDoTerritorio.conquistouTerritorioNesteTurno = true;
+            Debug.Log($"[SISTEMA DE CARTAS] Flag de conquista ativada para {atacante.donoDoTerritorio.nome}.");
+        }
+        // ---------------------------------------
+
+        // Atualiza a cor (AtualizarVisual() fará isso depois na função principal)
     }
 
 

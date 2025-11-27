@@ -52,6 +52,11 @@ public class GameManager : MonoBehaviour
     public Button botaoAvancarFase;
     public BattleManager battleManager;
     public TextMeshProUGUI textoReforcosPendentes;
+    
+    [Header("Sistema de Cartas")]
+    public List<Carta> baralho;
+    public List<Carta> descarte;
+    public int numeroDeTrocasRealizadas = 0; // Para controlar o valor (4, 6, 8, 10...)
 
     void Awake()
     {
@@ -95,7 +100,14 @@ public class GameManager : MonoBehaviour
         // 4. Objetivos
         InicializarEAssinlarObjetivos();
 
-        // 5. Inicia o jogo
+        // 5. Cartas
+        todosOsTerritorios = FindObjectsByType<TerritorioHandler>(FindObjectsSortMode.None).ToList();    
+        // ADICIONE ISSO AQUI:
+        InicializarBaralho();
+        
+        DistribuirTerritoriosIniciais();
+
+        // 6. Inicia o jogo
         Debug.Log("GameManager iniciado com " + todosOsJogadores.Count + " jogadores.");
         IniciarNovoTurno();
     }
@@ -205,9 +217,21 @@ public class GameManager : MonoBehaviour
 
     void MudarParaProximoJogador()
     {
+        // 1. ENTREGA DE CARTAS (NOVO)
+        // Antes de mudar de jogador, verificamos se o atual conquistou algum território
+        if (jogadorAtual.conquistouTerritorioNesteTurno)
+        {
+            DarCartaAoJogador(jogadorAtual);
+            
+            // Muito importante: Resetar a flag para que ele precise conquistar de novo no próximo turno
+            jogadorAtual.conquistouTerritorioNesteTurno = false; 
+        }
+
+        // 2. TROCA DE TURNO (EXISTENTE)
         indiceJogadorAtual = (indiceJogadorAtual + 1) % todosOsJogadores.Count;
         jogadorAtual = todosOsJogadores[indiceJogadorAtual];
 
+        // 3. CHECAGEM DE VITÓRIA E INÍCIO (EXISTENTE)
         ChecarVitoria();
 
         if (faseAtual != GamePhase.JogoPausado)
@@ -494,6 +518,159 @@ public class GameManager : MonoBehaviour
         VencedorInfo.nomeVencedor = vencedor.nome;
         VencedorInfo.corVencedor = vencedor.cor;
         SceneManager.LoadScene(2);
+    }
+
+    #endregion
+
+    #region SISTEMA DE CARTAS E TROCAS
+
+    void InicializarBaralho()
+    {
+        baralho = new List<Carta>();
+        descarte = new List<Carta>();
+
+        // Padrão de símbolos para distribuir equilibradamente
+        Simbolo[] padraoSimbolos = { Simbolo.Quadrado, Simbolo.Triangulo, Simbolo.Circulo };
+        int indexSimbolo = 0;
+
+        foreach (var territorio in todosOsTerritorios)
+        {
+            // Cria uma carta para cada território
+            baralho.Add(new Carta(padraoSimbolos[indexSimbolo], territorio));
+            
+            // Cicla entre 0, 1, 2 (Quadrado, Triangulo, Circulo)
+            indexSimbolo = (indexSimbolo + 1) % 3;
+        }
+
+        // Adiciona 2 Coringas (sem território associado)
+        baralho.Add(new Carta(Simbolo.Coringa, null));
+        baralho.Add(new Carta(Simbolo.Coringa, null));
+
+        EmbaralharDeck();
+    }
+
+    void EmbaralharDeck()
+    {
+        // Algoritmo Fisher-Yates para embaralhar
+        for (int i = 0; i < baralho.Count; i++)
+        {
+            Carta temp = baralho[i];
+            int randomIndex = Random.Range(i, baralho.Count);
+            baralho[i] = baralho[randomIndex];
+            baralho[randomIndex] = temp;
+        }
+    }
+
+    public void DarCartaAoJogador(Player jogador)
+    {
+        if (baralho.Count == 0)
+        {
+            // Se o baralho acabou, recicla o descarte
+            if (descarte.Count > 0)
+            {
+                baralho.AddRange(descarte);
+                descarte.Clear();
+                EmbaralharDeck();
+            }
+            else
+            {
+                Debug.LogWarning("Não há mais cartas no jogo!");
+                return;
+            }
+        }
+
+        Carta cartaComprada = baralho[0];
+        baralho.RemoveAt(0);
+        jogador.maoDeCartas.Add(cartaComprada);
+        Debug.Log($"Jogador {jogador.nome} recebeu a carta: {cartaComprada.simbolo} ({cartaComprada.territorioAssociado?.name ?? "Coringa"})");
+    }
+
+    // --- FUNÇÃO PRINCIPAL QUE VOCÊ VAI CHAMAR NO BOTÃO DE TROCA ---
+    public bool TentarRealizarTroca(List<Carta> cartasSelecionadas)
+    {
+        if (cartasSelecionadas.Count != 3)
+        {
+            Debug.Log("Você precisa selecionar exatamente 3 cartas.");
+            return false;
+        }
+
+        if (ValidarCombinacao(cartasSelecionadas))
+        {
+            // 1. Calcula exércitos ganhos
+            int exercitosGanhos = CalcularExercitosDaTroca();
+            
+            // 2. Adiciona aos reforços do jogador
+            reforcosPendentes += exercitosGanhos;
+            
+            // 3. Incrementa o contador global de trocas
+            numeroDeTrocasRealizadas++;
+
+            // 4. Verifica Bônus de Território (+2)
+            // Regra: Se a carta trocada for de um território que o jogador possui, ganha +2 tropas LÁ.
+            foreach (Carta c in cartasSelecionadas)
+            {
+                if (c.territorioAssociado != null && c.territorioAssociado.donoDoTerritorio == jogadorAtual)
+                {
+                    Debug.Log($"Bônus de território! +2 exércitos em {c.territorioAssociado.name}");
+                    c.territorioAssociado.numeroDeTropas += 2;
+                    c.territorioAssociado.AtualizarVisual();
+                }
+            }
+
+            // 5. Remove cartas da mão e joga no descarte
+            foreach (Carta c in cartasSelecionadas)
+            {
+                jogadorAtual.maoDeCartas.Remove(c);
+                descarte.Add(c);
+            }
+
+            // Atualiza UI
+            if (textoReforcosPendentes != null) 
+                textoReforcosPendentes.text = reforcosPendentes.ToString();
+            
+            Debug.Log($"Troca realizada! Ganhou {exercitosGanhos} exércitos.");
+            return true;
+        }
+        else
+        {
+            Debug.Log("Combinação inválida de cartas.");
+            return false;
+        }
+    }
+
+    // Lógica Matemática da Troca (4, 6, 8, 10, 12, 15, 20, 25...)
+    private int CalcularExercitosDaTroca()
+    {
+        int n = numeroDeTrocasRealizadas; // Primeira troca é index 0
+
+        if (n < 5)
+        {
+            // 0->4, 1->6, 2->8, 3->10, 4->12
+            return 4 + (2 * n);
+        }
+        else
+        {
+            // 5->15, 6->20, 7->25...
+            return 15 + ((n - 5) * 5);
+        }
+    }
+
+    // Lógica das Formas Geométricas
+    private bool ValidarCombinacao(List<Carta> cartas)
+    {
+        bool temCoringa = cartas.Any(c => c.simbolo == Simbolo.Coringa);
+        
+        if (temCoringa) return true; // Coringa valida qualquer trio no War tradicional
+
+        // Sem coringa, verifica formas
+        Simbolo s1 = cartas[0].simbolo;
+        Simbolo s2 = cartas[1].simbolo;
+        Simbolo s3 = cartas[2].simbolo;
+
+        bool todasIguais = (s1 == s2 && s2 == s3);
+        bool todasDiferentes = (s1 != s2 && s1 != s3 && s2 != s3);
+
+        return todasIguais || todasDiferentes;
     }
 
     #endregion

@@ -1,30 +1,34 @@
-// Player.cs
 using UnityEngine;
+using System.Collections.Generic; // <--- Necess√°rio para List
 
 [System.Serializable]
 public class Player
 {
     public string nome;
     public Color cor;
-    public string nomeColorido; // Para uso no TextMeshPro
-
-    public string nomeDaCor; // <-- ADICIONE ESTA LINHA (para lÛgica interna)
-
+    public string nomeColorido;
+    public string nomeDaCor;
     public Objetivo objetivoSecreto;
-
     public bool ehIA;
 
-    // Construtor atualizado para receber o nome da cor
-    public Player(string nome, Color cor, string nomeDaCor, bool ehIA = false) // <-- ADICIONE AQUI
+    // --- NOVO: CARTAS ---
+    public List<Carta> maoDeCartas; 
+    public bool conquistouTerritorioNesteTurno; // Resetar isso no in√≠cio de cada turno
+    // --------------------
+
+    public Player(string nome, Color cor, string nomeDaCor, bool ehIA = false)
     {
         this.nome = nome;
         this.cor = cor;
-        this.nomeDaCor = nomeDaCor; // <-- ADICIONE ESTA LINHA
+        this.nomeDaCor = nomeDaCor;
         this.objetivoSecreto = null;
         this.ehIA = ehIA;
 
-        // Sua lÛgica de nome colorido continua perfeita
         string hexCor = ColorUtility.ToHtmlStringRGB(cor);
         this.nomeColorido = $"<color=#{hexCor}>{nome}</color>";
+        
+        // Inicializa a lista
+        this.maoDeCartas = new List<Carta>();
+        this.conquistouTerritorioNesteTurno = false;
     }
 }
