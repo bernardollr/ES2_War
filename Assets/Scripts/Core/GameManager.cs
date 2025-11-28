@@ -81,7 +81,7 @@ public class GameManager : MonoBehaviour
         CriarJogador("Jogador 1", false); // false = não é IA
 
         // Cria os Jogadores BOT (Preenche até ter 6 no total)
-        int totalJogadores = 6;
+        int totalJogadores = 5;
         int contadorBots = 1;
         while (todosOsJogadores.Count < totalJogadores)
         {
@@ -217,21 +217,33 @@ public class GameManager : MonoBehaviour
 
     void MudarParaProximoJogador()
     {
-        // 1. ENTREGA DE CARTAS (NOVO)
-        // Antes de mudar de jogador, verificamos se o atual conquistou algum território
+        // 1. ENTREGA DE CARTAS (Lógica que já fizemos)
         if (jogadorAtual.conquistouTerritorioNesteTurno)
         {
             DarCartaAoJogador(jogadorAtual);
-            
-            // Muito importante: Resetar a flag para que ele precise conquistar de novo no próximo turno
-            jogadorAtual.conquistouTerritorioNesteTurno = false; 
+            jogadorAtual.conquistouTerritorioNesteTurno = false;
         }
 
-        // 2. TROCA DE TURNO (EXISTENTE)
-        indiceJogadorAtual = (indiceJogadorAtual + 1) % todosOsJogadores.Count;
-        jogadorAtual = todosOsJogadores[indiceJogadorAtual];
+        // 2. LOOP PARA ENCONTRAR O PRÓXIMO JOGADOR VIVO
+        // Ele vai rodar pelo menos uma vez, e se o próximo estiver morto, roda de novo.
+        // Adicionamos uma segurança (loopCount) para evitar travamento infinito caso todos morram (bug raro)
+        int loopCount = 0;
+        do
+        {
+            indiceJogadorAtual = (indiceJogadorAtual + 1) % todosOsJogadores.Count;
+            jogadorAtual = todosOsJogadores[indiceJogadorAtual];
+            loopCount++;
 
-        // 3. CHECAGEM DE VITÓRIA E INÍCIO (EXISTENTE)
+        } while (!JogadorEstaVivo(jogadorAtual) && loopCount <= todosOsJogadores.Count);
+
+        // Se rodou a lista toda e não achou ninguém (impossível se a checagem de vitória funcionar), evita crash
+        if (!JogadorEstaVivo(jogadorAtual)) 
+        {
+            Debug.LogError("ERRO CRÍTICO: Nenhum jogador vivo encontrado para o próximo turno!");
+            return;
+        }
+
+        // 3. CHECAGEM DE VITÓRIA E INÍCIO
         ChecarVitoria();
 
         if (faseAtual != GamePhase.JogoPausado)
@@ -373,7 +385,7 @@ public class GameManager : MonoBehaviour
                         territorioSelecionado.AtualizarVisual();
                         territorioAlvo.AtualizarVisual();
                         DesselecionarTerritorios();
-                        OnBotaoAvancarFaseClicado();
+                        //OnBotaoAvancarFaseClicado();
                     }
                 }
                 else
@@ -518,6 +530,12 @@ public class GameManager : MonoBehaviour
         VencedorInfo.nomeVencedor = vencedor.nome;
         VencedorInfo.corVencedor = vencedor.cor;
         SceneManager.LoadScene(2);
+    }
+
+    // Retorna true se o jogador tiver pelo menos 1 território
+    bool JogadorEstaVivo(Player jogador)
+    {
+        return todosOsTerritorios.Any(t => t.donoDoTerritorio == jogador);
     }
 
     #endregion
