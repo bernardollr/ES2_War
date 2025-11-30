@@ -3,8 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
-using ZeusUnite.Dice; // Certifique-se que esta biblioteca existe ou substitua a rolagem
+using TMPro;// Certifique-se que esta biblioteca existe ou substitua a rolagem
 using UnityEngine.UI;
 
 public class BattleManager : MonoBehaviour {

@@ -53,6 +53,8 @@ public class GameManager : MonoBehaviour
     public BattleManager battleManager;
     public TextMeshProUGUI textoReforcosPendentes;
 
+    public IUIManager uiManager;
+
     void Awake()
     {
         if (instance == null) instance = this;
@@ -62,41 +64,61 @@ public class GameManager : MonoBehaviour
         {
             battleManager = GetComponent<BattleManager>();
         }
+        if(uiManager == null)
+        {
+            uiManager = GetComponent<UIManager>() as IUIManager;
+        }
     }
 
     void Start()
     {
-        // 1. Configura as cores padrão se não foram definidas no Inspector
+        // 1. Configura as cores padrão
         InicializarCoresPadrao();
 
-        // 2. Inicializa lista e cria os jogadores
-        todosOsJogadores = new List<Player>();
-
-        // Cria o Jogador HUMANO (Player 1)
-        CriarJogador("Jogador 1", false); // false = não é IA
-
-        // Cria os Jogadores BOT (Preenche até ter 6 no total)
-        int totalJogadores = 6;
-        int contadorBots = 1;
-        while (todosOsJogadores.Count < totalJogadores)
+        // 2. Lógica de Criação de Jogo (SÓ roda se a lista estiver vazia)
+        // Se o Teste já preencheu a lista no Setup, este bloco é PULADO (o que é correto!)
+        if (todosOsJogadores == null || todosOsJogadores.Count == 0)
         {
-            CriarJogador($"CPU {contadorBots}", true); // true = é IA
-            contadorBots++;
+            todosOsJogadores = new List<Player>();
+
+            // Cria o Jogador HUMANO
+            CriarJogador("Jogador 1", false);
+
+            // Cria os Jogadores BOT
+            int totalJogadores = 6;
+            int contadorBots = 1;
+            while (todosOsJogadores.Count < totalJogadores)
+            {
+                CriarJogador($"CPU {contadorBots}", true);
+                contadorBots++;
+            }
+
+            // Configura o primeiro jogador
+            jogadorAtual = todosOsJogadores[0];
+            indiceJogadorAtual = 0;
+
+            // Configura o mapa e objetivos
+            todosOsTerritorios = FindObjectsByType<TerritorioHandler>(FindObjectsSortMode.None).ToList();
+            DistribuirTerritoriosIniciais();
+            InicializarEAssinlarObjetivos();
         }
 
-        // Configura o primeiro jogador
-        jogadorAtual = todosOsJogadores[0];
-        indiceJogadorAtual = 0;
+        // 3. Garantias de Segurança (Caso venha de um teste que não configurou tudo)
+        // (Corrigido o erro de digitação: de "=" para "==")
+        if (todosOsTerritorios == null || todosOsTerritorios.Count == 0)
+        {
+            todosOsTerritorios = FindObjectsByType<TerritorioHandler>(FindObjectsSortMode.None).ToList();
+        }
 
-        // 3. Busca territórios e distribui
-        todosOsTerritorios = FindObjectsByType<TerritorioHandler>(FindObjectsSortMode.None).ToList();
-        DistribuirTerritoriosIniciais();
+        if (jogadorAtual == null && todosOsJogadores.Count > 0)
+        {
+            jogadorAtual = todosOsJogadores[0];
+        }
 
-        // 4. Objetivos
-        InicializarEAssinlarObjetivos();
-
-        // 5. Inicia o jogo
+        // 4. Inicia o jogo
         Debug.Log("GameManager iniciado com " + todosOsJogadores.Count + " jogadores.");
+
+        // IMPORTANTE: IniciarNovoTurno deve ser a última coisa
         IniciarNovoTurno();
     }
 
@@ -154,7 +176,7 @@ public class GameManager : MonoBehaviour
         if (textoReforcosPendentes != null)
             textoReforcosPendentes.text = reforcosPendentes.ToString();
 
-        UIManager.instance.AtualizarPainelStatus(faseAtual, jogadorAtual);
+        uiManager.AtualizarPainelStatus(faseAtual, jogadorAtual);
         Debug.Log($"--- TURNO DE: {jogadorAtual.nome} ({jogadorAtual.nomeDaCor}) --- Reforços: {reforcosPendentes}");
 
         // --- INTEGRAÇÃO COM IA ---
@@ -197,16 +219,20 @@ public class GameManager : MonoBehaviour
                 break;
 
             case GamePhase.Remanejamento:
+                Debug.Log("[DEBUG] Entrou no case Remanejamento");
                 MudarParaProximoJogador();
                 return;
         }
-        UIManager.instance.AtualizarPainelStatus(faseAtual, jogadorAtual);
+        uiManager.AtualizarPainelStatus(faseAtual, jogadorAtual);
     }
 
     void MudarParaProximoJogador()
     {
+        Debug.Log($"[DEBUG] Mudando Jogador. Indice Antess: {indiceJogadorAtual}, Total Jogadores: {todosOsJogadores.Count}");
         indiceJogadorAtual = (indiceJogadorAtual + 1) % todosOsJogadores.Count;
         jogadorAtual = todosOsJogadores[indiceJogadorAtual];
+
+        Debug.Log($"[DEBUG] Índice Depois: {indiceJogadorAtual}, Novo Jogador: {jogadorAtual.nome}");
 
         ChecarVitoria();
 

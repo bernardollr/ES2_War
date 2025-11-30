@@ -27,4 +27,9 @@ public class Player
         string hexCor = ColorUtility.ToHtmlStringRGB(cor);
         this.nomeColorido = $"<color=#{hexCor}>{nome}</color>";
     }
+
+    public override string ToString()
+    {
+        return $"[Player: {nome} - Cor: {nomeDaCor}]";
+    }
 }

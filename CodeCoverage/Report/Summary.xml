@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CoverageReport scope="Summary">
+  <Summary>
+    <Generatedon>30/11/2025 - 04:12:56</Generatedon>
+    <Parser>MultiReportParser (3x OpenCoverParser)</Parser>
+    <Assemblies>3</Assemblies>
+    <Classes>25</Classes>
+    <Files>25</Files>
+    <Coveredlines>282</Coveredlines>
+    <Uncoveredlines>1054</Uncoveredlines>
+    <Coverablelines>1336</Coverablelines>
+    <Totallines>2246</Totallines>
+    <Linecoverage>21.1</Linecoverage>
+    <Coveredbranches>0</Coveredbranches>
+    <Totalbranches>0</Totalbranches>
+    <Coveredmethods>47</Coveredmethods>
+    <Totalmethods>149</Totalmethods>
+    <Methodcoverage>31.5</Methodcoverage>
+  </Summary>
+  <Coverage>
+    <Assembly name="Assembly-CSharp" classes="7" coverage="0" coveredlines="0" coverablelines="260" totallines="483" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="44" methodcoverage="0">
+      <Class name="DiceCallbackDemo" coverage="0" coveredlines="0" coverablelines="19" totallines="41" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="7" methodcoverage="0" />
+      <Class name="DiceDemo" coverage="0" coveredlines="0" coverablelines="94" totallines="164" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="11" methodcoverage="0" />
+      <Class name="ZeusUnite.ButtonOpenURL" coverage="0" coveredlines="0" coverablelines="4" totallines="21" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="4" methodcoverage="0" />
+      <Class name="ZeusUnite.Dice.CharRoller" coverage="0" coveredlines="0" coverablelines="8" totallines="25" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="2" methodcoverage="0" />
+      <Class name="ZeusUnite.Dice.Dicer" coverage="0" coveredlines="0" coverablelines="110" totallines="178" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="15" methodcoverage="0" />
+      <Class name="ZeusUnite.Dice.DiceRoller" coverage="0" coveredlines="0" coverablelines="8" totallines="19" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="2" methodcoverage="0" />
+      <Class name="ZeusUnite.Dice.PercentageRoller" coverage="0" coveredlines="0" coverablelines="17" totallines="35" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="3" methodcoverage="0" />
+    </Assembly>
+    <Assembly name="Assembly-CSharp-Editor" classes="1" coverage="0" coveredlines="0" coverablelines="49" totallines="72" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="4" methodcoverage="0">
+      <Class name="MissingScriptCleaner" coverage="0" coveredlines="0" coverablelines="49" totallines="72" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="4" methodcoverage="0" />
+    </Assembly>
+    <Assembly name="CoreDefinition" classes="17" coverage="27.4" coveredlines="282" coverablelines="1027" totallines="1691" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="47" totalmethods="101" methodcoverage="46.5">
+      <Class name="AIController" coverage="0" coveredlines="0" coverablelines="139" totallines="249" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="8" methodcoverage="0" />
+      <Class name="BattleManager" coverage="10.4" coveredlines="15" coverablelines="144" totallines="279" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="3" totalmethods="8" methodcoverage="37.5" />
+      <Class name="BorderScript" coverage="0" coveredlines="0" coverablelines="13" totallines="27" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="3" methodcoverage="0" />
+      <Class name="ButtonBehavior" coverage="0" coveredlines="0" coverablelines="3" totallines="9" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="1" methodcoverage="0" />
+      <Class name="EndScene" coverage="0" coveredlines="0" coverablelines="13" totallines="27" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="3" methodcoverage="0" />
+      <Class name="EventSystemDebugger" coverage="0" coveredlines="0" coverablelines="18" totallines="49" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="1" methodcoverage="0" />
+      <Class name="ExercitoHandler" coverage="0" coveredlines="0" coverablelines="7" totallines="27" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="3" methodcoverage="0" />
+      <Class name="GameManager" coverage="42.3" coveredlines="177" coverablelines="418" totallines="526" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="33" totalmethods="39" methodcoverage="84.6" />
+      <Class name="MainMenu" coverage="0" coveredlines="0" coverablelines="6" totallines="15" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="2" methodcoverage="0" />
+      <Class name="Objetivo" coverage="0" coveredlines="0" coverablelines="5" totallines="16" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="3" methodcoverage="0" />
+      <Class name="ObjetivoConquistarNTerritorios" coverage="0" coveredlines="0" coverablelines="8" totallines="20" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="2" methodcoverage="0" />
+      <Class name="ObjetivoDestruirJogador" coverage="0" coveredlines="0" coverablelines="9" totallines="21" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="4" methodcoverage="0" />
+      <Class name="ParallaxBackground" coverage="0" coveredlines="0" coverablelines="17" totallines="33" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="3" methodcoverage="0" />
+      <Class name="Player" coverage="76.9" coveredlines="10" coverablelines="13" totallines="35" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="1" totalmethods="2" methodcoverage="50" />
+      <Class name="SigaObjetoUI" coverage="0" coveredlines="0" coverablelines="9" totallines="31" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="0" totalmethods="2" methodcoverage="0" />
+      <Class name="TerritorioHandler" coverage="39.1" coveredlines="54" coverablelines="138" totallines="204" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="7" totalmethods="8" methodcoverage="87.5" />
+      <Class name="UIManager" coverage="38.8" coveredlines="26" coverablelines="67" totallines="123" branchcoverage="" coveredbranches="0" totalbranches="0" coveredmethods="3" totalmethods="9" methodcoverage="33.3" />
+    </Assembly>
+  </Coverage>
+</CoverageReport>
