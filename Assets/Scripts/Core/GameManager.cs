@@ -219,7 +219,6 @@ public class GameManager : MonoBehaviour
                 break;
 
             case GamePhase.Remanejamento:
-                Debug.Log("[DEBUG] Entrou no case Remanejamento");
                 MudarParaProximoJogador();
                 return;
         }

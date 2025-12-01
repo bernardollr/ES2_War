@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 
-public class UIManager : MonoBehaviour
+public class UIManager : MonoBehaviour, IUIManager
 {
     public static UIManager instance;
 
@@ -119,5 +119,13 @@ public class UIManager : MonoBehaviour
                 break;
         }       
 
+    }
+
+    public void AtualizarTextoObjetivo(string texto)
+    {
+        if (textoObjetivo != null)
+        {
+            textoObjetivo.text = texto;
+        }
     }
 }
