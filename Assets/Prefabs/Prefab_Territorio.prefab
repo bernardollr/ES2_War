@@ -16,7 +16,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1904994861289635819
 Transform:
   m_ObjectHideFlags: 0
@@ -252,11 +252,22 @@ MonoBehaviour:
   donoDoTerritorio:
     nome: 
     cor: {r: 0, g: 0, b: 0, a: 0}
+    nomeColorido: 
+    nomeDaCor: 
+    ehIA: 0
+    maoDeCartas: []
+    conquistouTerritorioNesteTurno: 0
   numeroDeTropas: 0
   playerDoTurno:
     nome: 
     cor: {r: 0, g: 0, b: 0, a: 0}
+    nomeColorido: 
+    nomeDaCor: 
+    ehIA: 0
+    maoDeCartas: []
+    conquistouTerritorioNesteTurno: 0
   borderScript: {fileID: 0}
+  contadorTropasTexto: {fileID: 0}
 --- !u!1 &5988279229125452262
 GameObject:
   m_ObjectHideFlags: 0
@@ -324,8 +335,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 1
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2e498d1c8094910479dc3e1b768306a4, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 2e498d1c8094910479dc3e1b768306a4, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
