@@ -12,7 +12,7 @@ public class AIController : MonoBehaviour
     [Header("Configurações")]
     public float tempoEntreAcoes = 1.0f; // Tempo para o humano ler o log e ver a ação
 
-    private GameManager gameManager;
+    public GameManager gameManager;
 
     void Awake()
     {
@@ -245,5 +245,6 @@ public class AIController : MonoBehaviour
         }
         Debug.Log("[IA] Decidiu não remanejar tropas.");
     }
+
     #endregion
 }

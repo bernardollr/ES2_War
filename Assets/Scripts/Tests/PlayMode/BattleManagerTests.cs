@@ -70,17 +70,14 @@ public class BattleManagerTests
         uiManager.iconeSoldier = new GameObject("ImgSol").AddComponent<Image>();
 
         gameManager.uiManager = uiManager;
-        UIManager.instance = uiManager; // Singleton da UI também
+        UIManager.instance = uiManager; 
 
-        // 4. JOGADORES (INJETADOS ANTES DE LIGAR O GM)
         p1 = new Player("P1", Color.blue, "Azul");
         p2 = new Player("P2", Color.red, "Vermelho");
 
-        // Injeta a lista para o Start() não criar novos
         gameManager.todosOsJogadores = new List<Player> { p1, p2 };
         gameManager.jogadorAtual = p1;
 
-        // 5. TERRITÓRIOS
         t1GO = new GameObject("Atacante");
         t1GO.AddComponent<SpriteRenderer>();
         t1GO.AddComponent<PolygonCollider2D>();
@@ -93,19 +90,15 @@ public class BattleManagerTests
         t_Defensor = t2GO.AddComponent<TerritorioHandler>();
         t_Defensor.donoDoTerritorio = p2;
 
-        // --- TERRITÓRIO DE SOBREVIVÊNCIA (PARA O P2 NÃO PERDER O JOGO NO TESTE) ---
-        // Isso evita que o SceneManager carregue a cena de vitória e destrua o teste
         var tSobrevivenciaGO = new GameObject("BaseSeguraP2");
         tSobrevivenciaGO.AddComponent<SpriteRenderer>();
         tSobrevivenciaGO.AddComponent<PolygonCollider2D>();
         var t_Sobrevivencia = tSobrevivenciaGO.AddComponent<TerritorioHandler>();
         t_Sobrevivencia.donoDoTerritorio = p2;
-        // --------------------------------------------------------------------------
 
-        // Lista de todos os territórios
+
         gameManager.todosOsTerritorios = new List<TerritorioHandler> { t_Atacante, t_Defensor, t_Sobrevivencia };
 
-        // LIGA O GM AGORA (O Start roda, vê os jogadores e territórios preenchidos e não faz nada)
         gameManagerGO.SetActive(true);
     }
 
@@ -117,32 +110,30 @@ public class BattleManagerTests
         if (t1GO != null) Object.DestroyImmediate(t1GO);
         if (t2GO != null) Object.DestroyImmediate(t2GO);
 
-        // Limpar UI
+
         var uiStub = GameObject.Find("UIStub");
         if (uiStub != null) Object.DestroyImmediate(uiStub);
     }
 
-    // --- TESTES ---
-
     [UnityTest]
     public IEnumerator Batalha_Normal_DeveSubtrairTropasEFecharPainel()
     {
-        // ARRANGE
+
         t_Atacante.numeroDeTropas = 10;
         t_Defensor.numeroDeTropas = 10;
         int tropasAtacantesAntes = 10;
         int tropasDefensorAntes = 10;
 
-        // ACT
+
         battleManager.IniciarBatalha(t_Atacante, t_Defensor);
 
-        // Check inicial
+
         Assert.IsTrue(battleManager.painelBatalha.activeSelf, "Painel deveria abrir.");
 
-        // Espera tempo suficiente (animação + delay)
+
         yield return new WaitForSeconds(0.6f);
 
-        // ASSERT
+
         bool houveMudanca = (t_Atacante.numeroDeTropas < tropasAtacantesAntes) || (t_Defensor.numeroDeTropas < tropasDefensorAntes);
         Assert.IsTrue(houveMudanca, "As tropas deveriam ter mudado.");
 
@@ -152,29 +143,28 @@ public class BattleManagerTests
     [UnityTest]
     public IEnumerator Batalha_Conquista_DeveMudarDonoEMoverTropas()
     {
-        t_Atacante.numeroDeTropas = 50; // Exército grande
+        t_Atacante.numeroDeTropas = 50;
         t_Defensor.numeroDeTropas = 1;
 
         int tentativas = 0;
-        // Tenta atacar até conquistar
+
         while (t_Defensor.donoDoTerritorio == p2 && tentativas < 20)
         {
             battleManager.IniciarBatalha(t_Atacante, t_Defensor);
-            yield return new WaitForSeconds(0.4f); // Tempo da batalha
+            yield return new WaitForSeconds(0.4f); 
             tentativas++;
         }
 
-        // Se o P2 ainda for dono, o teste falhou (azar estatístico ou erro lógico)
+
         Assert.AreEqual(p1, t_Defensor.donoDoTerritorio, "P1 deveria ter conquistado.");
 
-        // Verifica movimentação (pelo menos 1 tropa foi)
         Assert.GreaterOrEqual(t_Defensor.numeroDeTropas, 1);
     }
 
     [UnityTest]
     public IEnumerator Batalha_SemUI_NaoDeveQuebrar()
     {
-        battleManager.painelBatalha = null; // Simula erro de config
+        battleManager.painelBatalha = null; 
         battleManager.textoResultadoBatalha = null;
 
         t_Atacante.numeroDeTropas = 5;
@@ -189,5 +179,111 @@ public class BattleManagerTests
 
         bool houveMudanca = (t_Atacante.numeroDeTropas < 5) || (t_Defensor.numeroDeTropas < 2);
         Assert.IsTrue(houveMudanca, "A batalha deveria acontecer mesmo sem UI.");
+    }
+
+    /*
+     *FUNÇÃO: AtualizarImagensDados(List<int>, Image[])
+     *Complexidade Ciclomática: 10
+     */
+
+    // Teste 1: Lista de imagens nula ou vazia (Cobre o primeiro if)
+    [UnityTest]
+    public IEnumerator AtualizarImagens_ListaNula_NaoDeveDarErro()
+    {
+        List<int> resultados = new List<int> { 1, 2, 3 };
+
+        battleManager.AtualizarImagensDados(resultados, null);
+        battleManager.AtualizarImagensDados(resultados, new Image[0]); // Lista vazia
+
+        yield return null;
+
+        Assert.Pass("A função tratou listas nulas/vazias corretamente.");
+    }
+
+    // Teste 2: Elemento Nulo (Cobre o 'continue')
+    [UnityTest]
+    public IEnumerator AtualizarImagens_SlotNulo_DeveIgnorar()
+    {
+
+        List<int> resultados = new List<int> { 6 };
+        Image[] imagensComNull = new Image[] { null };
+
+
+        battleManager.AtualizarImagensDados(resultados, imagensComNull);
+
+        yield return null;
+
+        Assert.Pass("Ignorou slot nulo com sucesso.");
+    }
+
+    // Teste 3: Desativar Sobras (Cobre o 'if (i >= resultados.Count)')
+    [UnityTest]
+    public IEnumerator AtualizarImagens_MenosDadosQueSlots_DeveDesativarExtras()
+    {
+        List<int> resultados = new List<int> { 5 };
+
+        GameObject slot1GO = new GameObject("Slot1");
+        GameObject slot2GO = new GameObject("Slot2");
+        Image img1 = slot1GO.AddComponent<Image>();
+        Image img2 = slot2GO.AddComponent<Image>();
+
+        Image[] slots = new Image[] { img1, img2 };
+
+        battleManager.AtualizarImagensDados(resultados, slots);
+        yield return null;
+
+        Assert.IsTrue(img1.gameObject.activeSelf, "Slot 1 (usado) deveria estar ativo.");
+        Assert.IsFalse(img2.gameObject.activeSelf, "Slot 2 (extra) deveria estar inativo.");
+
+        Object.DestroyImmediate(slot1GO);
+        Object.DestroyImmediate(slot2GO);
+    }
+
+    // Teste 4: Caminho Feliz (Cobre atribuição de Sprite)
+    [UnityTest]
+    public IEnumerator AtualizarImagens_ResultadoValido_DeveTrocarSprite()
+    {
+        List<int> resultados = new List<int> { 1 };
+
+        battleManager.facesDosDados = new Sprite[6];
+
+        Sprite spriteTeste = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, 4, 4), Vector2.zero);
+        battleManager.facesDosDados[0] = spriteTeste; 
+
+
+        GameObject slotGO = new GameObject("Slot");
+        Image img = slotGO.AddComponent<Image>();
+        Image[] slots = new Image[] { img };
+
+
+        battleManager.AtualizarImagensDados(resultados, slots);
+        yield return null;
+
+        Assert.IsTrue(img.gameObject.activeSelf);
+        Assert.AreEqual(spriteTeste, img.sprite, "O sprite da imagem deveria ter mudado para a face do dado 1.");
+
+        Object.DestroyImmediate(slotGO);
+    }
+
+    // Teste 5: Sem Sprites Configurados (Cobre o último else)
+    [UnityTest]
+    public IEnumerator AtualizarImagens_SemSpritesNoManager_DeveApenasAtivar()
+    {
+        List<int> resultados = new List<int> { 1 };
+
+        battleManager.facesDosDados = null;
+
+        GameObject slotGO = new GameObject("Slot");
+        slotGO.SetActive(false); 
+        Image img = slotGO.AddComponent<Image>();
+        Image[] slots = new Image[] { img };
+
+        battleManager.AtualizarImagensDados(resultados, slots);
+        yield return null;
+
+        Assert.IsTrue(img.gameObject.activeSelf, "Deveria ter ativado o objeto mesmo sem sprites configurados.");
+        Assert.IsNull(img.sprite, "O sprite não deveria ter mudado (deve ser null ou padrão).");
+
+        Object.DestroyImmediate(slotGO);
     }
 }

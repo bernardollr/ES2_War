@@ -222,7 +222,7 @@ public class BattleManager : MonoBehaviour {
     }
 
 
-    void AtualizarImagensDados(List<int> resultados, Image[] imagensUI) {
+    public void AtualizarImagensDados(List<int> resultados, Image[] imagensUI) {
         if (imagensUI == null || imagensUI.Length == 0)
             return;
 
