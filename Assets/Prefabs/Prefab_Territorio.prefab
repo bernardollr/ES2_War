@@ -16,7 +16,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1904994861289635819
 Transform:
   m_ObjectHideFlags: 0
@@ -267,7 +267,7 @@ MonoBehaviour:
     maoDeCartas: []
     conquistouTerritorioNesteTurno: 0
   borderScript: {fileID: 0}
-  contadorTropasTexto: {fileID: 0}
+  contadorTropasTexto: {fileID: 3112597818423483530}
 --- !u!1 &5988279229125452262
 GameObject:
   m_ObjectHideFlags: 0
