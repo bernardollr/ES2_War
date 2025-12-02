@@ -37,8 +37,8 @@ public class GameManager : MonoBehaviour
     public int reforcosPendentes;
 
     [Header("Configuração de IA e Cores")]
-    public AIController aiController; // <-- ARRASTE SEU SCRIPT AICONTROLLER AQUI
-    public List<InfoCorJogador> coresDisponiveis; // Será preenchida automaticamente se vazia
+    public AIController aiController;
+    public List<InfoCorJogador> coresDisponiveis; // Usado apenas para o modo Debug/Fallback
 
     [Header("Gerenciamento de Seleção")]
     public TerritorioHandler territorioSelecionado;
@@ -52,11 +52,11 @@ public class GameManager : MonoBehaviour
     public Button botaoAvancarFase;
     public BattleManager battleManager;
     public TextMeshProUGUI textoReforcosPendentes;
-    
+
     [Header("Sistema de Cartas")]
     public List<Carta> baralho;
     public List<Carta> descarte;
-    public int numeroDeTrocasRealizadas = 0; // Para controlar o valor (4, 6, 8, 10...)
+    public int numeroDeTrocasRealizadas = 0;
 
     void Awake()
     {
@@ -71,63 +71,96 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        // 1. Configura as cores padrão se não foram definidas no Inspector
-        InicializarCoresPadrao();
-
-        // 2. Inicializa lista e cria os jogadores
+        // 1. Inicializa lista de jogadores
         todosOsJogadores = new List<Player>();
 
+        // 2. Tenta carregar a configuração vinda do Menu Principal
+        if (GameLaunchData.configuracaoJogadores != null && GameLaunchData.configuracaoJogadores.Count > 0)
+        {
+            Debug.Log("Carregando configurações do Menu...");
+            CarregarJogadoresDoSetup();
+        }
+        else
+        {
+            Debug.LogWarning("Nenhuma configuração encontrada. Iniciando modo DEBUG (Hardcoded).");
+            ConfigurarModoDebug();
+        }
+
+        // Validação de segurança (Minimo 3 players para o jogo não quebrar regras de War)
+        if (todosOsJogadores.Count < 2)
+        {
+            Debug.LogError("ERRO: O jogo precisa de pelo menos 2 jogadores para funcionar (Ideal 3+).");
+            // Aqui você poderia forçar adicionar bots se quisesse
+        }
+
+        // 3. Configura o primeiro jogador
+        if (todosOsJogadores.Count > 0)
+        {
+            jogadorAtual = todosOsJogadores[0];
+            indiceJogadorAtual = 0;
+        }
+
+        // 4. Busca territórios e distribui
+        todosOsTerritorios = FindObjectsByType<TerritorioHandler>(FindObjectsSortMode.None).ToList();
+
+        // Inicializa Objetivos
+        InicializarEAssinlarObjetivos();
+
+        // Inicializa Baralho
+        InicializarBaralho();
+
+        // Distribui territórios
+        DistribuirTerritoriosIniciais();
+
+        // 5. Inicia o jogo
+        Debug.Log("GameManager iniciado com " + todosOsJogadores.Count + " jogadores.");
+        IniciarNovoTurno();
+    }
+
+    #region CRIAÇÃO DE JOGADORES (SETUP VS DEBUG)
+
+    void CarregarJogadoresDoSetup()
+    {
+        foreach (var config in GameLaunchData.configuracaoJogadores)
+        {
+            // Cria o jogador exatamente como definido no menu
+            CriarJogadorEspecifico(config.nome, config.cor, config.nomeDaCor, config.ehIA);
+        }
+    }
+
+    void ConfigurarModoDebug()
+    {
+        InicializarCoresPadrao();
+
         // Cria o Jogador HUMANO (Player 1)
-        CriarJogador("Jogador 1", false); // false = não é IA
+        CriarJogadorAutomatico("Jogador 1 (Debug)", false);
 
         // Cria os Jogadores BOT (Preenche até ter 6 no total)
         int totalJogadores = 5;
         int contadorBots = 1;
         while (todosOsJogadores.Count < totalJogadores)
         {
-            CriarJogador($"CPU {contadorBots}", true); // true = é IA
+            CriarJogadorAutomatico($"CPU {contadorBots} (Debug)", true);
             contadorBots++;
         }
-
-        // Configura o primeiro jogador
-        jogadorAtual = todosOsJogadores[0];
-        indiceJogadorAtual = 0;
-
-        // 3. Busca territórios e distribui
-        todosOsTerritorios = FindObjectsByType<TerritorioHandler>(FindObjectsSortMode.None).ToList();
-        DistribuirTerritoriosIniciais();
-
-        // 4. Objetivos
-        InicializarEAssinlarObjetivos();
-
-        // 5. Cartas
-        todosOsTerritorios = FindObjectsByType<TerritorioHandler>(FindObjectsSortMode.None).ToList();    
-        // ADICIONE ISSO AQUI:
-        InicializarBaralho();
-        
-        DistribuirTerritoriosIniciais();
-
-        // 6. Inicia o jogo
-        Debug.Log("GameManager iniciado com " + todosOsJogadores.Count + " jogadores.");
-        IniciarNovoTurno();
     }
 
-    // Função auxiliar para criar jogadores com cores únicas
-    void CriarJogador(string nomeBase, bool ehIA)
+    // Função usada pelo Setup (Cores já definidas)
+    void CriarJogadorEspecifico(string nome, Color cor, string nomeDaCor, bool ehIA)
     {
-        if (coresDisponiveis.Count == 0)
-        {
-            Debug.LogError("Acabaram as cores disponíveis! Não é possível criar mais jogadores.");
-            return;
-        }
+        Player novoPlayer = new Player(nome, cor, nomeDaCor, ehIA);
+        todosOsJogadores.Add(novoPlayer);
+    }
 
-        // Pega a primeira cor da lista e remove para ninguém mais usar
+    // Função usada pelo Debug (Pega cores da lista interna)
+    void CriarJogadorAutomatico(string nomeBase, bool ehIA)
+    {
+        if (coresDisponiveis.Count == 0) return;
+
         InfoCorJogador info = coresDisponiveis[0];
         coresDisponiveis.RemoveAt(0);
 
-        // Instancia o Player (Certifique-se que seu Player.cs tem o bool ehIA no construtor)
-        Player novoPlayer = new Player(nomeBase, info.cor, info.nome, ehIA);
-        todosOsJogadores.Add(novoPlayer);
+        CriarJogadorEspecifico(nomeBase, info.cor, info.nome, ehIA);
     }
 
     void InicializarCoresPadrao()
@@ -145,6 +178,8 @@ public class GameManager : MonoBehaviour
             };
         }
     }
+
+    #endregion
 
     #region LÓGICA DE TURNO E FASES
 
@@ -174,7 +209,6 @@ public class GameManager : MonoBehaviour
         {
             if (aiController != null)
             {
-                // Inicia o cérebro da IA
                 aiController.IniciarTurnoIA(jogadorAtual);
             }
             else
@@ -186,10 +220,6 @@ public class GameManager : MonoBehaviour
 
     public void OnBotaoAvancarFaseClicado()
     {
-        // Se for turno da IA, o botão (se clicado manualmente por bug) não deve funcionar,
-        // mas a IA chama essa função via código, então permitimos se a origem for código.
-        // Como não dá pra saber a origem fácil, confiamos na lógica do AIController.
-
         if (faseAtual == GamePhase.Alocacao && reforcosPendentes > 0)
         {
             Debug.Log("Alerta: Aloque todas as tropas antes de avançar!");
@@ -217,7 +247,7 @@ public class GameManager : MonoBehaviour
 
     void MudarParaProximoJogador()
     {
-        // 1. ENTREGA DE CARTAS (Lógica que já fizemos)
+        // 1. ENTREGA DE CARTAS
         if (jogadorAtual.conquistouTerritorioNesteTurno)
         {
             DarCartaAoJogador(jogadorAtual);
@@ -225,8 +255,6 @@ public class GameManager : MonoBehaviour
         }
 
         // 2. LOOP PARA ENCONTRAR O PRÓXIMO JOGADOR VIVO
-        // Ele vai rodar pelo menos uma vez, e se o próximo estiver morto, roda de novo.
-        // Adicionamos uma segurança (loopCount) para evitar travamento infinito caso todos morram (bug raro)
         int loopCount = 0;
         do
         {
@@ -236,10 +264,9 @@ public class GameManager : MonoBehaviour
 
         } while (!JogadorEstaVivo(jogadorAtual) && loopCount <= todosOsJogadores.Count);
 
-        // Se rodou a lista toda e não achou ninguém (impossível se a checagem de vitória funcionar), evita crash
-        if (!JogadorEstaVivo(jogadorAtual)) 
+        if (!JogadorEstaVivo(jogadorAtual))
         {
-            Debug.LogError("ERRO CRÍTICO: Nenhum jogador vivo encontrado para o próximo turno!");
+            Debug.LogError("ERRO CRÍTICO: Nenhum jogador vivo encontrado!");
             return;
         }
 
@@ -268,10 +295,8 @@ public class GameManager : MonoBehaviour
     {
         if (faseAtual == GamePhase.JogoPausado) return;
 
-        // --- BLOQUEIO PARA IA ---
-        // Se for a vez da IA, o jogador humano não pode clicar em nada
+        // Se for a vez da IA, o jogador humano não pode clicar
         if (jogadorAtual.ehIA) return;
-        // ------------------------
 
         switch (faseAtual)
         {
@@ -308,13 +333,10 @@ public class GameManager : MonoBehaviour
     {
         if (territorioSelecionado == null)
         {
-            if (territorioClicado.donoDoTerritorio == jogadorAtual)
+            if (territorioClicado.donoDoTerritorio == jogadorAtual && territorioClicado.numeroDeTropas > 1)
             {
-                if (territorioClicado.numeroDeTropas > 1)
-                {
-                    territorioSelecionado = territorioClicado;
-                    territorioSelecionado.Selecionar(true);
-                }
+                territorioSelecionado = territorioClicado;
+                territorioSelecionado.Selecionar(true);
             }
         }
         else
@@ -385,7 +407,6 @@ public class GameManager : MonoBehaviour
                         territorioSelecionado.AtualizarVisual();
                         territorioAlvo.AtualizarVisual();
                         DesselecionarTerritorios();
-                        //OnBotaoAvancarFaseClicado();
                     }
                 }
                 else
@@ -448,8 +469,7 @@ public class GameManager : MonoBehaviour
         }
 
         // Objetivos de Conquista
-        int totalTerritorios = todosOsTerritorios.Count;
-        poolDeObjetivos.Add(new ObjetivoConquistarNTerritorios(totalTerritorios, "Conquistar o mundo"));
+        poolDeObjetivos.Add(new ObjetivoConquistarNTerritorios(todosOsTerritorios.Count, "Conquistar o mundo"));
         poolDeObjetivos.Add(new ObjetivoConquistarNTerritorios(24, "Conquistar 24 territórios"));
 
         List<Objetivo> objetivosEmbaralhados = poolDeObjetivos.OrderBy(o => Random.value).ToList();
@@ -492,8 +512,6 @@ public class GameManager : MonoBehaviour
 
         foreach (Player jogador in todosOsJogadores)
         {
-            // Se o jogador foi eliminado (0 territórios), pula a checagem dele
-            // (Opcional: você pode remover o jogador da lista se quiser)
             int numTerritorios = todosOsTerritorios.Count(t => t.donoDoTerritorio == jogador);
             if (numTerritorios == 0) continue;
 
@@ -504,7 +522,6 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        // Fallback: Dominação total
         Player donoReferencia = todosOsTerritorios[0].donoDoTerritorio;
         bool todosIguais = true;
         foreach (var territorio in todosOsTerritorios)
@@ -532,7 +549,6 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene(2);
     }
 
-    // Retorna true se o jogador tiver pelo menos 1 território
     bool JogadorEstaVivo(Player jogador)
     {
         return todosOsTerritorios.Any(t => t.donoDoTerritorio == jogador);
@@ -547,20 +563,15 @@ public class GameManager : MonoBehaviour
         baralho = new List<Carta>();
         descarte = new List<Carta>();
 
-        // Padrão de símbolos para distribuir equilibradamente
         Simbolo[] padraoSimbolos = { Simbolo.Quadrado, Simbolo.Triangulo, Simbolo.Circulo };
         int indexSimbolo = 0;
 
         foreach (var territorio in todosOsTerritorios)
         {
-            // Cria uma carta para cada território
             baralho.Add(new Carta(padraoSimbolos[indexSimbolo], territorio));
-            
-            // Cicla entre 0, 1, 2 (Quadrado, Triangulo, Circulo)
             indexSimbolo = (indexSimbolo + 1) % 3;
         }
 
-        // Adiciona 2 Coringas (sem território associado)
         baralho.Add(new Carta(Simbolo.Coringa, null));
         baralho.Add(new Carta(Simbolo.Coringa, null));
 
@@ -569,7 +580,6 @@ public class GameManager : MonoBehaviour
 
     void EmbaralharDeck()
     {
-        // Algoritmo Fisher-Yates para embaralhar
         for (int i = 0; i < baralho.Count; i++)
         {
             Carta temp = baralho[i];
@@ -583,104 +593,65 @@ public class GameManager : MonoBehaviour
     {
         if (baralho.Count == 0)
         {
-            // Se o baralho acabou, recicla o descarte
             if (descarte.Count > 0)
             {
                 baralho.AddRange(descarte);
                 descarte.Clear();
                 EmbaralharDeck();
             }
-            else
-            {
-                Debug.LogWarning("Não há mais cartas no jogo!");
-                return;
-            }
+            else return;
         }
 
         Carta cartaComprada = baralho[0];
         baralho.RemoveAt(0);
         jogador.maoDeCartas.Add(cartaComprada);
-        Debug.Log($"Jogador {jogador.nome} recebeu a carta: {cartaComprada.simbolo} ({cartaComprada.territorioAssociado?.name ?? "Coringa"})");
     }
 
-    // --- FUNÇÃO PRINCIPAL QUE VOCÊ VAI CHAMAR NO BOTÃO DE TROCA ---
     public bool TentarRealizarTroca(List<Carta> cartasSelecionadas)
     {
-        if (cartasSelecionadas.Count != 3)
-        {
-            Debug.Log("Você precisa selecionar exatamente 3 cartas.");
-            return false;
-        }
+        if (cartasSelecionadas.Count != 3) return false;
 
         if (ValidarCombinacao(cartasSelecionadas))
         {
-            // 1. Calcula exércitos ganhos
             int exercitosGanhos = CalcularExercitosDaTroca();
-            
-            // 2. Adiciona aos reforços do jogador
             reforcosPendentes += exercitosGanhos;
-            
-            // 3. Incrementa o contador global de trocas
             numeroDeTrocasRealizadas++;
 
-            // 4. Verifica Bônus de Território (+2)
-            // Regra: Se a carta trocada for de um território que o jogador possui, ganha +2 tropas LÁ.
             foreach (Carta c in cartasSelecionadas)
             {
                 if (c.territorioAssociado != null && c.territorioAssociado.donoDoTerritorio == jogadorAtual)
                 {
-                    Debug.Log($"Bônus de território! +2 exércitos em {c.territorioAssociado.name}");
                     c.territorioAssociado.numeroDeTropas += 2;
                     c.territorioAssociado.AtualizarVisual();
                 }
             }
 
-            // 5. Remove cartas da mão e joga no descarte
             foreach (Carta c in cartasSelecionadas)
             {
                 jogadorAtual.maoDeCartas.Remove(c);
                 descarte.Add(c);
             }
 
-            // Atualiza UI
-            if (textoReforcosPendentes != null) 
+            if (textoReforcosPendentes != null)
                 textoReforcosPendentes.text = reforcosPendentes.ToString();
-            
-            Debug.Log($"Troca realizada! Ganhou {exercitosGanhos} exércitos.");
+
             return true;
         }
-        else
-        {
-            Debug.Log("Combinação inválida de cartas.");
-            return false;
-        }
+        return false;
     }
 
-    // Lógica Matemática da Troca (4, 6, 8, 10, 12, 15, 20, 25...)
     private int CalcularExercitosDaTroca()
     {
-        int n = numeroDeTrocasRealizadas; // Primeira troca é index 0
-
-        if (n < 5)
-        {
-            // 0->4, 1->6, 2->8, 3->10, 4->12
-            return 4 + (2 * n);
-        }
-        else
-        {
-            // 5->15, 6->20, 7->25...
-            return 15 + ((n - 5) * 5);
-        }
+        int n = numeroDeTrocasRealizadas;
+        if (n < 5) return 4 + (2 * n);
+        else return 15 + ((n - 5) * 5);
     }
 
-    // Lógica das Formas Geométricas
     private bool ValidarCombinacao(List<Carta> cartas)
     {
         bool temCoringa = cartas.Any(c => c.simbolo == Simbolo.Coringa);
-        
-        if (temCoringa) return true; // Coringa valida qualquer trio no War tradicional
+        if (temCoringa) return true;
 
-        // Sem coringa, verifica formas
         Simbolo s1 = cartas[0].simbolo;
         Simbolo s2 = cartas[1].simbolo;
         Simbolo s3 = cartas[2].simbolo;
