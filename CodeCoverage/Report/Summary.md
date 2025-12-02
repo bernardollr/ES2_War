@@ -1,21 +1,21 @@
 ﻿# Summary
 |||
 |:---|:---|
-| Generated on: | 02/12/2025 - 16:18:52 |
+| Generated on: | 02/12/2025 - 16:55:45 |
 | Parser: | MultiReportParser (3x OpenCoverParser) |
 | Assemblies: | 3 |
 | Classes: | 25 |
 | Files: | 25 |
-| Covered lines: | 453 |
-| Uncovered lines: | 889 |
+| Covered lines: | 512 |
+| Uncovered lines: | 830 |
 | Coverable lines: | 1342 |
 | Total lines: | 2249 |
-| Line coverage: | 33.7% (453 of 1342) |
+| Line coverage: | 38.1% (512 of 1342) |
 | Covered branches: | 0 |
 | Total branches: | 0 |
-| Covered methods: | 63 |
+| Covered methods: | 66 |
 | Total methods: | 150 |
-| Method coverage: | 42% (63 of 150) |
+| Method coverage: | 44% (66 of 150) |
 
 |**Name**|**Covered**|**Uncovered**|**Coverable**|**Total**|**Line coverage**|**Covered**|**Total**|**Branch coverage**|**Covered**|**Total**|**Method coverage**|
 |:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -29,15 +29,15 @@
 |ZeusUnite.Dice.PercentageRoller|0|17|17|35|0%|0|0||0|3|0%|
 |**Assembly-CSharp-Editor**|**0**|**49**|**49**|**72**|**0%**|**0**|**0**|****|**0**|**4**|**0%**|
 |MissingScriptCleaner|0|49|49|72|0%|0|0||0|4|0%|
-|**CoreDefinition**|**453**|**580**|**1033**|**1694**|**43.8%**|**0**|**0**|****|**63**|**102**|**61.7%**|
+|**CoreDefinition**|**512**|**521**|**1033**|**1694**|**49.5%**|**0**|**0**|****|**66**|**102**|**64.7%**|
 |AIController|0|139|139|249|0%|0|0||0|8|0%|
-|BattleManager|46|98|144|279|31.9%|0|0||5|8|62.5%|
+|BattleManager|94|50|144|279|65.2%|0|0||7|8|87.5%|
 |BorderScript|0|13|13|27|0%|0|0||0|3|0%|
 |ButtonBehavior|0|3|3|9|0%|0|0||0|1|0%|
 |EndScene|7|6|13|27|53.8%|0|0||1|3|33.3%|
 |EventSystemDebugger|0|18|18|49|0%|0|0||0|1|0%|
 |ExercitoHandler|0|7|7|27|0%|0|0||0|3|0%|
-|GameManager|289|129|418|521|69.1%|0|0||38|39|97.4%|
+|GameManager|295|123|418|521|70.5%|0|0||39|39|100%|
 |MainMenu|0|6|6|15|0%|0|0||0|2|0%|
 |Objetivo|5|0|5|16|100%|0|0||3|3|100%|
 |ObjetivoConquistarNTerritorios|8|0|8|20|100%|0|0||2|2|100%|
@@ -46,4 +46,4 @@
 |Player|10|3|13|35|76.9%|0|0||1|2|50%|
 |SigaObjetoUI|0|9|9|31|0%|0|0||0|2|0%|
 |TerritorioHandler|57|81|138|204|41.3%|0|0||7|8|87.5%|
-|UIManager|26|47|73|131|35.6%|0|0||3|10|30%|
+|UIManager|31|42|73|131|42.4%|0|0||3|10|30%|
