@@ -24,6 +24,25 @@ public class GameManagerTests
     [SetUp]
     public void Setup()
     {
+        if(BattleManager.instance != null)
+        {
+            if(BattleManager.instance.gameObject != null)
+            {
+                Object.DestroyImmediate(BattleManager.instance.gameObject);
+            }
+            BattleManager.instance = null;
+        }
+
+        if(GameManager.instance != null)
+        {
+            if (GameManager.instance.gameObject != null)
+            {
+                Object.DestroyImmediate(GameManager.instance.gameObject);
+            }
+            GameManager.instance = null;
+        }
+
+        gameManagerGO = new GameObject();
         // --- Mock do UIManager ---
         mockUI = Substitute.For<IUIManager>();
 
@@ -398,8 +417,326 @@ public class GameManagerTests
         Assert.AreEqual(GameManager.GamePhase.Ataque, gameManager.faseAtual);
     }
 
-    
+    // -- TESTE 6: Trocar para Território Inválido
+    [UnityTest]
+    public IEnumerator AoTrocarTerritorioCom1Tropa_DeveApenasDeselecionar()
+    {
+        gameManager.faseAtual = GameManager.GamePhase.Ataque;
+
+        t_Atacante.donoDoTerritorio = p1;
+        t_Atacante.numeroDeTropas = 3;
+        gameManager.territorioSelecionado = t_Atacante;
+
+        t_Defensor.donoDoTerritorio = p1;
+        t_Defensor.numeroDeTropas = 1;
+
+        gameManager.OnTerritorioClicado(t_Defensor);
+
+        yield return null;
+
+        Assert.IsNull(gameManager.territorioSelecionado, "A seleção deveria ter sido limpa.");
+    }
+
+    [UnityTest]
+    public IEnumerator AoIniciarBatalha_ComErro_DeveResetarParaAtaque()
+    {
+        gameManager.faseAtual = GameManager.GamePhase.Ataque;
+
+        t_Atacante.donoDoTerritorio = p1;
+        t_Atacante.numeroDeTropas = 3;
+        t_Defensor.donoDoTerritorio = p2;
+        t_Atacante.vizinhos = new List<TerritorioHandler> { t_Defensor };
+
+        Object.DestroyImmediate(battleManagerGO);
+
+        gameManager.OnTerritorioClicado(t_Atacante);
+
+        UnityEngine.TestTools.LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("Erro batalha:.*"));
+
+        gameManager.OnTerritorioClicado(t_Defensor);
+
+        yield return null;
+
+        Assert.AreEqual(GameManager.GamePhase.Ataque, gameManager.faseAtual);
+
+        Assert.IsNull(gameManager.territorioSelecionado);
+    }
+    /*
+     * FUNÇÃO: HandleCliqueRemanejamento(TerritorioHandler)
+     * Complexidade Ciclomática: 8
+     */
+
+    // -- TESTE 1: Cobre o primeiro if e o if(tropas > 1)
+    [UnityTest]
+    public IEnumerator Remanejar_SelecionarOrigem_ComMaisDeUmaTropa_Sucesso()
+    {
+        gameManager.faseAtual = GameManager.GamePhase.Remanejamento;
+        t_Atacante.donoDoTerritorio = p1;
+        t_Atacante.numeroDeTropas = 2;
+        gameManager.territorioSelecionado = null;
+
+        gameManager.OnTerritorioClicado(t_Atacante);
 
 
+        yield return null;
+
+        Assert.AreEqual(t_Atacante, gameManager.territorioSelecionado, "Deveria ter selecionado o territorio de origem.");
+    }
+
+    // -- TESTE 2: Cobre o else implicito do if(tropas > 1) --
+    [UnityTest]
+    public IEnumerator Remanejar_NaoSeleciona_SeTiverApenasUmaTropa()
+    {
+        gameManager.faseAtual = GameManager.GamePhase.Remanejamento;
+        t_Atacante.donoDoTerritorio = p1;
+        t_Atacante.numeroDeTropas = 1;
+        gameManager.territorioSelecionado = null;
+
+        gameManager.OnTerritorioClicado(t_Atacante);
+
+        yield return null;
+
+        Assert.IsNull(gameManager.territorioSelecionado, "Não deveria selecionar território com 1 tropa.");
+    }
+
+    // -- TESTE 3: Cobre if(territorioClicado == territorioSelecionado)
+    [UnityTest]
+    public IEnumerator Remanejar_AoClicarNoMesmo_DeveDeselecionar()
+    {
+        gameManager.faseAtual = GameManager.GamePhase.Remanejamento;
+        t_Atacante.donoDoTerritorio = p1;
+        t_Atacante.numeroDeTropas = 3;
+
+        gameManager.territorioSelecionado = t_Atacante;
+
+        gameManager.OnTerritorioClicado(t_Atacante);
+
+        yield return null;
+
+        Assert.IsNull(gameManager.territorioSelecionado, "Deveria ter limpado  a seleção.");
+    }
+
+    // -- TESTE: Cobre o else if(dono == jogadorAtual), a verificação de vizinhos, a movimentação e o OnBotaoAvancarFaseClicado --
+    [UnityTest]
+    public IEnumerator Remanejar_MovimentoValido_DeveMoverTropasEAvancarFase()
+    {
+        gameManager.faseAtual = GameManager.GamePhase.Remanejamento;
+        gameManager.jogadorAtual = p1;
+
+        t_Atacante.donoDoTerritorio = p1;
+        t_Atacante.numeroDeTropas = 3;
+
+        t_Defensor.donoDoTerritorio = p1;
+        t_Defensor.numeroDeTropas = 1;
+
+        var t3GO = new GameObject("TerritorioP2_Sobrevivencia");
+        t3GO.AddComponent<SpriteRenderer>();
+        t3GO.AddComponent<PolygonCollider2D>();
+        var t_Sobrevivencia = t3GO.AddComponent<TerritorioHandler>();
+        t_Sobrevivencia.donoDoTerritorio = p2;
+
+        gameManager.todosOsTerritorios.Add(t_Sobrevivencia);
+
+        t_Atacante.vizinhos = new List<TerritorioHandler> { t_Defensor };
+
+        gameManager.territorioSelecionado = t_Atacante;
+
+        gameManager.OnTerritorioClicado(t_Defensor);
+
+        yield return null;
+
+        Assert.AreEqual(2, t_Atacante.numeroDeTropas, "Origem deveria perder 1 tropa.");
+        Assert.AreEqual(2, t_Defensor.numeroDeTropas, "Destino deveria ganhar 1 tropa");
+
+        Assert.IsNull(gameManager.territorioSelecionado);
+
+        Assert.AreEqual(GameManager.GamePhase.Alocacao, gameManager.faseAtual);
+    }
+
+    // -- TESTE 5: Cobre o else do if(vizinhos.Contains)
+    [UnityTest]
+    public IEnumerator Remanejar_Falha_SeDestinoNaoForVizinho()
+    {
+        gameManager.faseAtual = GameManager.GamePhase.Remanejamento;
+
+        t_Atacante.donoDoTerritorio = p1;
+        t_Atacante.numeroDeTropas = 3;
+        t_Defensor.donoDoTerritorio = p1;
+
+        t_Atacante.vizinhos = new List<TerritorioHandler>();
+
+        gameManager.territorioSelecionado = t_Atacante;
+
+        gameManager.OnTerritorioClicado(t_Defensor);
+
+        yield return null;
+
+        Assert.AreEqual(3, t_Atacante.numeroDeTropas);
+        Assert.IsNull(gameManager.territorioSelecionado, "Deveria deselecionar ao tentar movimento inválido.");
+    }
+
+    /*
+    * FUNÇÃO: InicializarEAssinlarObjetivos()
+    * Complexidade Ciclomática: 8
+    */
+
+    // -- TESTE 1: Cobre o loop principal
+    [Test]
+    public void InicializarObjetivos_DeveAtribuirObjetivosParaTodos()
+    {
+        var p3 = new Player("P3", Color.green, "Verde");
+        gameManager.todosOsJogadores = new List<Player> { p1, p2, p3 };
+
+        gameManager.todosOsTerritorios = new List<TerritorioHandler> { t_Atacante, t_Defensor };
+
+        gameManager.InicializarEAssinlarObjetivos();
+
+        foreach(var jogador in gameManager.todosOsJogadores)
+        {
+            Assert.IsNotNull(jogador.objetivoSecreto, $"O jogador {jogador.nome} ficou sem objetivo!");
+            Debug.Log($"Objetivo de {jogador.nome}: {jogador.objetivoSecreto.Descricao}");
+        }
+    }
+
+    // -- TESTE 2: Cobre o if/continue da auto destruição
+    [Test]
+    public void InicializarObjetivos_NinguemDeveTerObjetivoDeDestruirSiMesmo()
+    {
+        gameManager.todosOsJogadores = new List<Player> { p1, p2 };
+        gameManager.todosOsTerritorios = new List<TerritorioHandler> { t_Atacante };
+
+        gameManager.InicializarEAssinlarObjetivos();
+
+        foreach(var jogador in gameManager.todosOsJogadores)
+        {
+            if(jogador.objetivoSecreto is ObjetivoDestruirJogador objDestruir)
+            {
+                Assert.AreNotEqual(jogador, objDestruir.JogadorAlvo, $"ERRO: {jogador.nome} recebeu objetivo de destruir a si mesmo.");
+            }
+        }
+    }
+
+    // -- TESTE 3: Verifica se os tipos corretos estão sendo criados
+    [Test]
+    public void InicializarObjetivos_DeveCriarObjetivosDeConquistaEDestruicao()
+    {
+        gameManager.todosOsJogadores = new List<Player> { p1, p2 };
+        gameManager.todosOsTerritorios = new List<TerritorioHandler>();
+
+        bool gerouDestruicao = false;
+        bool gerouConquista = false;
+
+        for(int i=0; i<10; i++)
+        {
+            gameManager.InicializarEAssinlarObjetivos();
+
+            if (p1.objetivoSecreto is ObjetivoDestruirJogador) gerouDestruicao = true;
+            if (p1.objetivoSecreto is ObjetivoConquistarNTerritorios) gerouConquista = true;
+        }
+
+        Assert.IsTrue(gerouDestruicao, "Deveria ser capaz de gerar objetivos de Destruição.");
+        Assert.IsTrue(gerouConquista, "Deveria ser capaz de gerar objetivos de Conquista.");
+    }
+
+    /*
+     *FUNÇÃO: ChecarVitoria()
+     *Complexidade Ciclomática: 9
+     */
+
+    // -- TESTE 1: Vitória por objetivo secreto
+    [UnityTest]
+    public IEnumerator ChecarVitoria_ObjetivoConcluido_DeveAnunciarVencedor()
+    {
+        p1.objetivoSecreto = new ObjetivoConquistarNTerritorios(2, "Conquistar 2");
+
+        t_Atacante.donoDoTerritorio = p1;
+        t_Defensor.donoDoTerritorio = p1;
+
+        gameManager.ChecarVitoria();
+
+        yield return null;
+
+        Assert.AreEqual(GameManager.GamePhase.JogoPausado, gameManager.faseAtual);
+        Assert.AreEqual(p1.nome, VencedorInfo.nomeVencedor);
+    }
+
+    // -- TESTE 2: Vitória por dominação
+    [UnityTest]
+    public IEnumerator ChecarVitoria_DominacaoTotal_DeveAnunciarVencedor()
+    {
+        p1.objetivoSecreto = new ObjetivoConquistarNTerritorios(99, "Impossível");
+
+        t_Atacante.donoDoTerritorio = p1;
+        t_Defensor.donoDoTerritorio = p1;
+
+        gameManager.ChecarVitoria();
+
+        yield return null;
+
+        Assert.AreEqual(GameManager.GamePhase.JogoPausado, gameManager.faseAtual);
+        Assert.AreEqual(p1.nome, VencedorInfo.nomeVencedor);
+    }
+
+    /*
+     *FUNÇÃO: DistribuirTerritoriosIniciais()
+     *Complexidade Ciclomática: 2
+     *Acoplamento de Classes: 8
+     */
+
+    // -- TESTE 1: Verifica se todos receberam dono e tropa inicial
+    [UnityTest]
+    public IEnumerator DistribuiTerritorios_DeveAtribuirDonoETropasParaTodos()
+    {
+        t_Atacante.donoDoTerritorio = null;
+        t_Atacante.numeroDeTropas = 0;
+        t_Defensor.donoDoTerritorio = null;
+        t_Defensor.numeroDeTropas = 0;
+
+        gameManager.DistribuirTerritoriosIniciais();
+
+        yield return null;
+
+        Assert.IsNotNull(t_Atacante.donoDoTerritorio, "Território 1 ficou sem dono.");
+        Assert.AreEqual(1, t_Atacante.numeroDeTropas, "Território 1 deveria ter 1 tropa inicial.");
+
+        Assert.IsNotNull(t_Defensor.donoDoTerritorio, "Território 2 ficou sem dono.");
+        Assert.AreEqual(1, t_Defensor.numeroDeTropas, "Territorio 2 deveria ter 1 tropa inicial.");
+    }
+
+    // -- TESTE 2: Verifica o equilíbrio da distribuição
+    [UnityTest]
+    public IEnumerator DistribuirTerritorios_DeveDividirIgualmenteEntreJogadores()
+    {
+        var t3GO = new GameObject("T3");
+        t3GO.AddComponent<SpriteRenderer>();
+        t3GO.AddComponent<PolygonCollider2D>();
+        var t3 = t3GO.AddComponent <TerritorioHandler>();
+        var t4GO = new GameObject("T4");
+        t4GO.AddComponent<SpriteRenderer>();
+        t4GO.AddComponent<PolygonCollider2D>();
+        var t4 = t4GO.AddComponent<TerritorioHandler>();
+
+        gameManager.todosOsTerritorios.Add(t3);
+        gameManager.todosOsTerritorios.Add(t4);
+
+        gameManager.DistribuirTerritoriosIniciais();
+
+        yield return null;
+
+        int contagemP1 = 0;
+        int contagemP2 = 0;
+
+        foreach(var t in gameManager.todosOsTerritorios)
+        {
+            if (t.donoDoTerritorio == p1) contagemP1++;
+            if (t.donoDoTerritorio == p2) contagemP2++;
+        }
+
+        Assert.AreEqual(2, contagemP1, "Jogador 1 deveria ter 2 territórios.");
+        Assert.AreEqual(2, contagemP2, "Jogador 2 deveria ter 2 territórios.");
+
+        Object.DestroyImmediate(t3GO);
+        Object.DestroyImmediate(t4GO);
+    }
 
 }

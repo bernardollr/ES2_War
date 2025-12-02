@@ -1,21 +1,21 @@
 ﻿# Summary
 |||
 |:---|:---|
-| Generated on: | 30/11/2025 - 04:12:56 |
+| Generated on: | 02/12/2025 - 16:18:52 |
 | Parser: | MultiReportParser (3x OpenCoverParser) |
 | Assemblies: | 3 |
 | Classes: | 25 |
 | Files: | 25 |
-| Covered lines: | 282 |
-| Uncovered lines: | 1054 |
-| Coverable lines: | 1336 |
-| Total lines: | 2246 |
-| Line coverage: | 21.1% (282 of 1336) |
+| Covered lines: | 453 |
+| Uncovered lines: | 889 |
+| Coverable lines: | 1342 |
+| Total lines: | 2249 |
+| Line coverage: | 33.7% (453 of 1342) |
 | Covered branches: | 0 |
 | Total branches: | 0 |
-| Covered methods: | 47 |
-| Total methods: | 149 |
-| Method coverage: | 31.5% (47 of 149) |
+| Covered methods: | 63 |
+| Total methods: | 150 |
+| Method coverage: | 42% (63 of 150) |
 
 |**Name**|**Covered**|**Uncovered**|**Coverable**|**Total**|**Line coverage**|**Covered**|**Total**|**Branch coverage**|**Covered**|**Total**|**Method coverage**|
 |:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -29,21 +29,21 @@
 |ZeusUnite.Dice.PercentageRoller|0|17|17|35|0%|0|0||0|3|0%|
 |**Assembly-CSharp-Editor**|**0**|**49**|**49**|**72**|**0%**|**0**|**0**|****|**0**|**4**|**0%**|
 |MissingScriptCleaner|0|49|49|72|0%|0|0||0|4|0%|
-|**CoreDefinition**|**282**|**745**|**1027**|**1691**|**27.4%**|**0**|**0**|****|**47**|**101**|**46.5%**|
+|**CoreDefinition**|**453**|**580**|**1033**|**1694**|**43.8%**|**0**|**0**|****|**63**|**102**|**61.7%**|
 |AIController|0|139|139|249|0%|0|0||0|8|0%|
-|BattleManager|15|129|144|279|10.4%|0|0||3|8|37.5%|
+|BattleManager|46|98|144|279|31.9%|0|0||5|8|62.5%|
 |BorderScript|0|13|13|27|0%|0|0||0|3|0%|
 |ButtonBehavior|0|3|3|9|0%|0|0||0|1|0%|
-|EndScene|0|13|13|27|0%|0|0||0|3|0%|
+|EndScene|7|6|13|27|53.8%|0|0||1|3|33.3%|
 |EventSystemDebugger|0|18|18|49|0%|0|0||0|1|0%|
 |ExercitoHandler|0|7|7|27|0%|0|0||0|3|0%|
-|GameManager|177|241|418|526|42.3%|0|0||33|39|84.6%|
+|GameManager|289|129|418|521|69.1%|0|0||38|39|97.4%|
 |MainMenu|0|6|6|15|0%|0|0||0|2|0%|
-|Objetivo|0|5|5|16|0%|0|0||0|3|0%|
-|ObjetivoConquistarNTerritorios|0|8|8|20|0%|0|0||0|2|0%|
-|ObjetivoDestruirJogador|0|9|9|21|0%|0|0||0|4|0%|
+|Objetivo|5|0|5|16|100%|0|0||3|3|100%|
+|ObjetivoConquistarNTerritorios|8|0|8|20|100%|0|0||2|2|100%|
+|ObjetivoDestruirJogador|5|4|9|21|55.5%|0|0||3|4|75%|
 |ParallaxBackground|0|17|17|33|0%|0|0||0|3|0%|
 |Player|10|3|13|35|76.9%|0|0||1|2|50%|
 |SigaObjetoUI|0|9|9|31|0%|0|0||0|2|0%|
-|TerritorioHandler|54|84|138|204|39.1%|0|0||7|8|87.5%|
-|UIManager|26|41|67|123|38.8%|0|0||3|9|33.3%|
+|TerritorioHandler|57|81|138|204|41.3%|0|0||7|8|87.5%|
+|UIManager|26|47|73|131|35.6%|0|0||3|10|30%|

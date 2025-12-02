@@ -196,10 +196,6 @@ public class GameManager : MonoBehaviour
 
     public void OnBotaoAvancarFaseClicado()
     {
-        // Se for turno da IA, o botão (se clicado manualmente por bug) não deve funcionar,
-        // mas a IA chama essa função via código, então permitimos se a origem for código.
-        // Como não dá pra saber a origem fácil, confiamos na lógica do AIController.
-
         if (faseAtual == GamePhase.Alocacao && reforcosPendentes > 0)
         {
             Debug.Log("Alerta: Aloque todas as tropas antes de avançar!");
@@ -402,7 +398,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void DistribuirTerritoriosIniciais()
+    public void DistribuirTerritoriosIniciais()
     {
         List<TerritorioHandler> territoriosEmbaralhados = todosOsTerritorios.OrderBy(a => Random.value).ToList();
         int jogadorIndex = 0;
@@ -426,7 +422,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void InicializarEAssinlarObjetivos()
+    public void InicializarEAssinlarObjetivos()
     {
         poolDeObjetivos = new List<Objetivo>();
 
