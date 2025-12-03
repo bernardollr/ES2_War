@@ -4,6 +4,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 using NSubstitute;
+using System.Text.RegularExpressions;
 
 
 public class GameManagerTests
@@ -738,5 +739,47 @@ public class GameManagerTests
         Object.DestroyImmediate(t3GO);
         Object.DestroyImmediate(t4GO);
     }
+
+
+    // Teste de Recuperação
+    [UnityTest]
+    public IEnumerator TesteRecuperacao_HandleCliqueAtaque_FalhaBattleManager_DeveResetarParaAtaque()
+    // Força uma falha de sistema para verificar se o jogo é restaurado.
+    {
+        // Configura cenário de ataque
+        gameManager.faseAtual = GameManager.GamePhase.Ataque;
+        t_Atacante.donoDoTerritorio = p1;
+        t_Atacante.numeroDeTropas = 3;
+        t_Defensor.donoDoTerritorio = p2;
+        t_Atacante.vizinhos = new List<TerritorioHandler> { t_Defensor };
+
+        // Força a falha do sistema
+        if (gameManager.battleManager != null)
+        {
+            Object.DestroyImmediate(gameManager.battleManager.gameObject);
+        }
+        gameManager.battleManager = null;
+
+        // Expectativa de recuperação
+        LogAssert.Expect(LogType.Error, new Regex("Erro batalha:.*"));
+
+        // Seleciona o atacante
+        gameManager.OnTerritorioClicado(t_Atacante);
+        yield return null;
+        // Tenta atacar o defensor, forçando o erro no bloco 'try'
+        gameManager.OnTerritorioClicado(t_Defensor);
+        yield return null;
+
+        // Verificação da recuperação
+        // A fase deve ser resetada para Ataque
+        Assert.AreEqual(GameManager.GamePhase.Ataque, gameManager.faseAtual,
+            "O sistema deve se recuperar e retornar à fase de Ataque.");
+        // O estado de seleção deve ser limpo
+        Assert.IsNull(gameManager.territorioSelecionado,
+            "A seleção deve ter sido limpa após o erro de recuperação.");
+        Assert.IsNull(gameManager.territorioAlvo,
+            "O território alvo deve ter sido limpo após o erro de recuperação.");
+    }
+
 
 }
