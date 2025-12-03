@@ -3919,7 +3919,7 @@ MonoBehaviour:
     m_Bottom: 0
   m_ChildAlignment: 4
   m_StartCorner: 0
-  m_StartAxis: 0
+  m_StartAxis: 1
   m_CellSize: {x: 161.3219, y: 209.7646}
   m_Spacing: {x: 20, y: 5}
   m_Constraint: 0
@@ -11348,7 +11348,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 00d2836d309db6b4cb0903582489feaa, type: 2}
   cardPrefab: {fileID: 3114904656978922505, guid: f61822ecb736b6341b52fd161426b9fb, type: 3}
   areaDaMao: {fileID: 505096045}
-  botaoTrocar: {fileID: 2001535039}
 --- !u!1 &2001535037
 GameObject:
   m_ObjectHideFlags: 0

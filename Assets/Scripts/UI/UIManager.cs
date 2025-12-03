@@ -27,7 +27,7 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI textoBotaoAvancarFase;
 
     [Header("DEBUG: Objetivo Atual")]
-    public string objetivoAtualDebug = "Conquistar 18 territórios.";
+    public string objetivoAtualDebug = "Conquistar 18 territÃ³rios.";
 
     private void Awake()
     {
@@ -46,28 +46,32 @@ public class UIManager : MonoBehaviour
     public void AbrirPopUpObjetivo()
     {
         popUpObjetivo.SetActive(true);
-        // Puxa a descrição do objetivo secreto do jogador atual direto do GameManager
-        textoObjetivo.text = GameManager.instance.jogadorAtual.objetivoSecreto.Descricao; // <-- LINHA NOVA
+        // Puxa a descriÃ§Ã£o do objetivo secreto do jogador atual direto do GameManager
+        if (GameManager.instance.jogadorAtual.objetivoSecreto != null)
+             textoObjetivo.text = GameManager.instance.jogadorAtual.objetivoSecreto.Descricao;
     }
 
     public void FecharPopUpObjetivo() {
         popUpObjetivo.SetActive(false);
     }
 
+    // --- AQUI ESTAVA O PROBLEMA ---
     public void AbrirPopUpCartas() {
         popUpCartas.SetActive(true);
+        
+        // COMENTEI ESTE BLOCO:
+        // NÃ£o devemos destruir as cartas aqui, pois o DeckManager 
+        // jÃ¡ preparou elas no inÃ­cio do turno.
+        /*
         foreach (Transform child in containerCartasGrid) {
             Destroy(child.gameObject);
         }
-
-        AdicionarCartasUI("Brasil");
-        AdicionarCartasUI("África");
-        AdicionarCartasUI("Brasil");
+        */
     }
 
-    void AdicionarCartasUI(string nomeTerritorio) {
+    /*void AdicionarCartasUI(string nomeTerritorio) {
         GameObject novaCarta = Instantiate(prefabCartaUI, containerCartasGrid);
-    }
+    }*/
 
     public void FecharPopUpCartas()
     {

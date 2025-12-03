@@ -58,6 +58,9 @@ public class GameManager : MonoBehaviour
     public List<Carta> descarte;
     public int numeroDeTrocasRealizadas = 0;
 
+    [Header("Sistema Visual de Cartas")]
+    public DeckManager deckManagerVisual;
+
     void Awake()
     {
         if (instance == null) instance = this;
@@ -90,7 +93,6 @@ public class GameManager : MonoBehaviour
         if (todosOsJogadores.Count < 2)
         {
             Debug.LogError("ERRO: O jogo precisa de pelo menos 2 jogadores para funcionar (Ideal 3+).");
-            // Aqui você poderia forçar adicionar bots se quisesse
         }
 
         // 3. Configura o primeiro jogador
@@ -204,6 +206,14 @@ public class GameManager : MonoBehaviour
         UIManager.instance.AtualizarPainelStatus(faseAtual, jogadorAtual);
         Debug.Log($"--- TURNO DE: {jogadorAtual.nome} ({jogadorAtual.nomeDaCor}) --- Reforços: {reforcosPendentes}");
 
+        // --- ATUALIZAÇÃO VISUAL DAS CARTAS (NOVO) ---
+        // Se for um humano, limpa o grid e desenha as cartas que ele tem na mão lógica
+        if (!jogadorAtual.ehIA && deckManagerVisual != null)
+        {
+            deckManagerVisual.AtualizarMaoVisual(jogadorAtual.maoDeCartas);
+        }
+        // --------------------------------------------
+
         // --- INTEGRAÇÃO COM IA ---
         if (jogadorAtual.ehIA)
         {
@@ -218,13 +228,35 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void OnBotaoAvancarFaseClicado()
+public void OnBotaoAvancarFaseClicado()
     {
+        // 1. Bloqueio de Reforços (Já existia) - Impede avançar se ainda tiver tropas para colocar
         if (faseAtual == GamePhase.Alocacao && reforcosPendentes > 0)
         {
             Debug.Log("Alerta: Aloque todas as tropas antes de avançar!");
+            // Sugestão: Você pode chamar um UIManager.instance.MostrarAviso("Aloque suas tropas!"); aqui
             return;
         }
+
+        // --- 2. BLOQUEIO DA REGRA DE 5 CARTAS (NOVO) ---
+        // Regra: Se o jogador tiver 5 ou mais cartas, ele é OBRIGADO a trocar antes de atacar.
+        if (faseAtual == GamePhase.Alocacao)
+        {
+            // Verifica se é humano (IA já deve tratar isso na lógica dela) e se tem 5+ cartas
+            if (!jogadorAtual.ehIA && jogadorAtual.maoDeCartas.Count >= 5)
+            {
+                Debug.LogWarning("REGRA WAR: Você possui 5 cartas! A troca é obrigatória.");
+                
+                // Abre o menu de cartas automaticamente para forçar o jogador a ver
+                if (UIManager.instance != null) 
+                {
+                    UIManager.instance.AbrirPopUpCartas();
+                }
+                
+                return; // INTERROMPE: Não deixa mudar para a fase de Ataque
+            }
+        }
+        // ------------------------------------------------
 
         DesselecionarTerritorios();
 
@@ -247,6 +279,9 @@ public class GameManager : MonoBehaviour
 
     void MudarParaProximoJogador()
     {
+        // LOG PARA DEBUG
+        Debug.Log($"[DEBUG TURN] Trocando turno. Jogador: {jogadorAtual.nome}. Conquistou algo? {jogadorAtual.conquistouTerritorioNesteTurno}");
+        
         // 1. ENTREGA DE CARTAS
         if (jogadorAtual.conquistouTerritorioNesteTurno)
         {
@@ -546,32 +581,65 @@ public class GameManager : MonoBehaviour
 
         VencedorInfo.nomeVencedor = vencedor.nome;
         VencedorInfo.corVencedor = vencedor.cor;
+        
+        // Ative a linha abaixo quando adicionar a cena de vitória no Build Settings
         SceneManager.LoadScene(2);
     }
 
-    bool JogadorEstaVivo(Player jogador)
+    public bool JogadorEstaVivo(Player jogador)
     {
         return todosOsTerritorios.Any(t => t.donoDoTerritorio == jogador);
+    }
+
+    // --- NOVO MÉTODO: RECICLAGEM DE ELIMINADOS ---
+    public void ColetarCartasDoEliminado(Player eliminado)
+    {
+        if (eliminado.maoDeCartas.Count > 0)
+        {
+            Debug.Log($"GAME: O jogador {eliminado.nome} foi eliminado! Devolvendo {eliminado.maoDeCartas.Count} cartas ao descarte.");
+            
+            // Joga as cartas do morto no descarte para serem embaralhadas de volta
+            descarte.AddRange(eliminado.maoDeCartas);
+            
+            // Limpa a mão dele (opcional, mas bom para garantir)
+            eliminado.maoDeCartas.Clear();
+        }
     }
 
     #endregion
 
     #region SISTEMA DE CARTAS E TROCAS
 
-    void InicializarBaralho()
+void InicializarBaralho()
     {
         baralho = new List<Carta>();
         descarte = new List<Carta>();
 
-        Simbolo[] padraoSimbolos = { Simbolo.Quadrado, Simbolo.Triangulo, Simbolo.Circulo };
-        int indexSimbolo = 0;
-
         foreach (var territorio in todosOsTerritorios)
         {
-            baralho.Add(new Carta(padraoSimbolos[indexSimbolo], territorio));
-            indexSimbolo = (indexSimbolo + 1) % 3;
+            // 1. Busca o CardData visual
+            CardData dadosDoArquivo = null;
+            
+            if (deckManagerVisual != null)
+            {
+                dadosDoArquivo = deckManagerVisual.todasAsCartas.Find(c => c.nomeTerritorio == territorio.name);
+            }
+
+            // 2. Define o símbolo
+            // MUDANÇA AQUI: Não precisa mais converter!
+            // Se achou o arquivo, usa o símbolo dele direto. Se não, usa Quadrado.
+            Simbolo simboloCorreto = (dadosDoArquivo != null) ? dadosDoArquivo.simbolo : Simbolo.Quadrado;
+
+            if (dadosDoArquivo == null)
+            {
+                Debug.LogWarning($"AVISO: Não achei CardData para {territorio.name}. Usando Quadrado.");
+            }
+
+            // 3. Cria a carta lógica
+            baralho.Add(new Carta(simboloCorreto, territorio));
         }
 
+        // Adiciona os Coringas (Simbolo.Coringa já existe no enum)
         baralho.Add(new Carta(Simbolo.Coringa, null));
         baralho.Add(new Carta(Simbolo.Coringa, null));
 
@@ -587,10 +655,25 @@ public class GameManager : MonoBehaviour
             baralho[i] = baralho[randomIndex];
             baralho[randomIndex] = temp;
         }
+        Debug.Log("Baralho LÓGICO embaralhado!");
     }
 
     public void DarCartaAoJogador(Player jogador)
     {
+        Debug.Log($"[DEBUG] Entrou em DarCartaAoJogador para {jogador.nome}");
+
+        // --- 1. VISUAL (PRIORIDADE) ---
+        if (deckManagerVisual != null && jogador == jogadorAtual && !jogador.ehIA)
+        {
+            Debug.Log("VISUAL: Enviando comando para o DeckManager criar o visual...");
+            deckManagerVisual.ComprarUmaCarta();
+        }
+        else
+        {
+            Debug.LogWarning($"VISUAL PULADO: DeckVisual null? {deckManagerVisual == null} | Player atual? {jogador == jogadorAtual} | É IA? {jogador.ehIA}");
+        }
+
+        // --- 2. LÓGICA ANTIGA ---
         if (baralho.Count == 0)
         {
             if (descarte.Count > 0)
@@ -599,12 +682,25 @@ public class GameManager : MonoBehaviour
                 descarte.Clear();
                 EmbaralharDeck();
             }
-            else return;
+            else
+            {
+                Debug.LogError("ERRO LÓGICO: O baralho do GameManager está vazio e sem descarte!");
+                return;
+            }
         }
 
         Carta cartaComprada = baralho[0];
         baralho.RemoveAt(0);
         jogador.maoDeCartas.Add(cartaComprada);
+        
+        // --- CORREÇÃO DO ERRO DO CORINGA ---
+        // Verifica se existe um território antes de tentar ler o nome.
+        // Se for null, usamos a string "Coringa".
+        string nomeDaCarta = (cartaComprada.territorioAssociado != null) 
+            ? cartaComprada.territorioAssociado.name 
+            : "Coringa";
+
+        Debug.Log($"LOGICA: Carta {nomeDaCarta} adicionada à mão lógica.");
     }
 
     public bool TentarRealizarTroca(List<Carta> cartasSelecionadas)
