@@ -29,8 +29,8 @@ Este projeto foi realizado colaborativamente pelos seguintes membros:
 | **Bernardo Luis Lacerda Rodrigues** | Dev Backend |
 | **Caio Andrade da Silva Cunha** | Dev Backend |
 | **Claudio Alberto Lopes Junior** | Dev Frontend & QA |
-| **Estêvão Mori Ferreira Nolêto Magalhães** | Product Owner (PO) & QA |
-| **Gabriel Cantuaria Dos Santos Chaves** | Product Owner (PO) & QA |
+| **Estêvão Mori Ferreira Nolêto Magalhães** | PO & QA |
+| **Gabriel Cantuaria Dos Santos Chaves** | PO & QA |
 | **Lucas de Oliveira Barroso Victorino** | Dev Backend & Scrum Master |
 | **Nathan Nascimento da Silva** | Dev Backend |
 
@@ -40,9 +40,6 @@ Caso queira contribuir ou analisar o código, siga os passos abaixo:
 
 1.  Certifique-se de ter o **Unity** instalado.
 2.  Clone este repositório:
-    ```bash
-    git clone [https://github.com/seu-usuario/seu-repositorio-war.git](https://github.com/seu-usuario/seu-repositorio-war.git)
-    ```
 3.  Abra o **Unity Hub**, clique em "Add" e selecione a pasta do projeto clonado.
 4.  Abra o projeto e execute a cena principal.
 
